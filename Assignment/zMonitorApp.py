@@ -1,7 +1,7 @@
 import random
 import threading
 from paho.mqtt import client as mqtt_client
-
+#BEFORE
 #MQTT broker configuration
 broker = 'rule28.i4t.swin.edu.au'
 port = 1883
