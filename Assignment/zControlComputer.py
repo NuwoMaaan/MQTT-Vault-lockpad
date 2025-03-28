@@ -4,8 +4,8 @@ import threading
 import json
 from paho.mqtt import client as mqtt_client
 
-#broker = 'broker.emqx.io'
-broker = 'rule28.i4t.swin.edu.au'
+broker = 'broker.emqx.io'
+#broker = 'rule28.i4t.swin.edu.au'
 port = 1883
 topics = {
     "control": "<103996982>/padlock/control",
