@@ -2,22 +2,10 @@ import random
 import time
 import threading
 import json
-import signal
-import sys
 from paho.mqtt import client as mqtt_client
 from connections.connect import connect_mqtt
-from schemas.topics import Topics
-
-# Create an instance of Topics to access the topic strings
-topics = Topics()
-
-# Global flag for graceful shutdown
-shutdown_flag = threading.Event()
-
-def signal_handler(sig, frame):
-    print('\nShutdown signal received. Stopping...')
-    shutdown_flag.set()
-    sys.exit(0)
+from schemas.topics import TOPICS
+from utils.signal_utils import setup_signal_handlers, shutdown_flag
 
 def publish(client):
     try:
@@ -25,24 +13,24 @@ def publish(client):
             time.sleep(5)
             if shutdown_flag.is_set():
                 break
-            control = random.choice(['OPEN','CLOSE'])                    #constant sending of arbitruary fake data for demostration purposes
-            result = client.publish(topics.control, control)
+            control = random.choice(['OPEN','CLOSE'])                    
+            result = client.publish(TOPICS.control, control)
             # result: [0, 1]
             status = result[0]                                           
             if status == 0:
-                print(f"Sent: CONTROL_SYS->PADLOCK: {control}, topic: {topics.control}\n\r")
+                print(f"Sent: CONTROL_SYS->PADLOCK: {control}, topic: {TOPICS.control}\n\r")
             else:
-                print(f"Failed to send message to topic {topics.control}")
+                print(f"Failed to send message to topic {TOPICS.control}")
     except KeyboardInterrupt:
         print('Program Stopped')
 
-def publish_lockout(client):                                     #send to control topic to override padlock
-    issue = (f'MAX ATTEMPTS EXCEED: Overriding lockout control - Access: LOCKED\nSending override to {topics.control}')  
+def publish_lockout(client):                                    
+    issue = (f'MAX ATTEMPTS EXCEED: Overriding lockout control - Access: LOCKED\nSending override to {TOPICS.control}')  
     print(issue)
-    client.publish(topics.control, issue)               
+    client.publish(TOPICS.control, issue)               
 
 def detection_login_attempts(msg):
-     if (msg.topic) == topics.metrics:
+     if (msg.topic) == TOPICS.metrics:
         print(f"Received `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")                    
         try:                                                            
             received_message = (msg.payload.decode())    
@@ -61,14 +49,14 @@ def subscribe(client: mqtt_client):
         if detection_login_attempts(msg):                                      
             publish_lockout(client)
 
-    client.subscribe(topics.status)                                
-    client.subscribe(topics.metrics)
+    client.subscribe(TOPICS.status)                                
+    client.subscribe(TOPICS.metrics)
     client.on_message = on_message
 
 
 def run():
     # Set up signal handler for graceful shutdown
-    signal.signal(signal.SIGINT, signal_handler)
+    setup_signal_handlers()
     
     client = connect_mqtt()
     threading.Thread(target=subscribe, args=(client,)).start()          #Threading to allow for concurrent programming meaning application 
@@ -77,7 +65,7 @@ def run():
     try:
         client.loop_forever()
     except KeyboardInterrupt:
-        print("Received KeyboardInterrupt, shutting down...")
+        print("KeyboardInterrupt, shutting down...")
         shutdown_flag.set()
         client.loop_stop()
         client.disconnect()
