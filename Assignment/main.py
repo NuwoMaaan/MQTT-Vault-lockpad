@@ -1,6 +1,6 @@
-from zControlComputer import run as run_control
-from zVaultPadlock import run as run_padlock
-from zMonitorApp import run as run_monitor
+from app.zControlComputer import run as run_control
+from app.zVaultPadlock import run as run_padlock
+from app.zMonitorApp import run as run_monitor
 
 
 def main():
