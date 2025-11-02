@@ -2,42 +2,13 @@ import random
 import threading
 import keyboard
 from paho.mqtt import client as mqtt_client
-#BEFORE
-#MQTT broker configuration
-#broker = 'rule28.i4t.swin.edu.au'
-broker = 'broker.emqx.io'
-port = 1883
-
-#predefined topics
-topics = {
-    "control": "<103996982>/padlock/control",
-    "status": "<103996982>/padlock/status",
-    "metrics": "<103996982>/padlock/metrics",
-    "lockout": "<103996982>/padlock/control/lockout"
-}
-
-
-client_id = f'client-{random.randint(0, 100)}'
-username = '<103996982>'
-password = '<103996982>'
+from connections.connect import connect_mqtt
+from schemas import topics
 
 #global variables
 selected_topic = None
 current_mode = None
 messages = []
-
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("\nConnected to MQTT Broker!")
-    else:
-        print(f"Failed to connect, return code {rc}")
-                                                                        #Base code from: https://www.emqx.com/en/blog/how-to-use-mqtt-in-python
-def connect_mqtt() -> mqtt_client:                                      #Majority use of mqtt is based from here - then added with my functionality for all programs
-    client = mqtt_client.Client(client_id)
-    client.username_pw_set(username, password)
-    client.on_connect = on_connect
-    client.connect(broker, port)
-    return client
 
 def publish(client):
     global selected_topic                             
