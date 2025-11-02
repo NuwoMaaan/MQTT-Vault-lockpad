@@ -5,31 +5,8 @@ import psutil
 import json
 import threading
 from paho.mqtt import client as mqtt_client
-
-broker = 'broker.emqx.io'
-port = 1883
-topics = {
-    "control": "<103996982>/padlock/control",
-    "status": "<103996982>/padlock/status",
-    "metrics": "<103996982>/padlock/metrics",
-    "lockout": "<103996982>/padlock/control/lockout"
-}
-client_id = f'publish-{random.randint(0, 1000)}'
-username = '<103996982>'
-password = '<103996982>'
-
-def connect_mqtt():
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:                                                           #Base code from: https://www.emqx.com/en/blog/how-to-use-mqtt-in-python
-            print("Connected to MQTT Broker!")                                #Majority use of mqtt is based from here - then added with my functionality for all programs
-        else:
-            print("Failed to connect, return code %d\n", rc)
-
-    client = mqtt_client.Client(client_id)
-    client.username_pw_set(username, password)
-    client.on_connect = on_connect
-    client.connect(broker, port)
-    return client
+from connections.connect import connect_mqtt
+from schemas import topics
 
 
 def generate_padlock_status_data():                                          #other random data generation for demostration purposes.
