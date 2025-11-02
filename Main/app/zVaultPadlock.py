@@ -3,13 +3,14 @@ from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from mock.padlock_data_gen import generate_padlock_status_data, generate_padlock_metric_data
 from utils.console import console_out
-from utils.MqttApp import MQTTApp
+from utils.mqtt_app import MQTTApp
 
 
 class MQTTPadlockApp(MQTTApp):
     def publish(self, client: mqtt_client):
         try:
             while not shutdown_flag.is_set():
+                # Generate padlock data
                 padlock_status_data, padlock_metric_data = generate_padlock_status_data(), generate_padlock_metric_data()
 
                 result_status = client.publish(TOPICS.status, padlock_status_data)
