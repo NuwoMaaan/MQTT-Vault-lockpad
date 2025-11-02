@@ -12,8 +12,6 @@ class MQTTControlComputerApp(MQTTApp):
         try:
             while not shutdown_flag.is_set():
                 time.sleep(5)
-                if shutdown_flag.is_set():
-                    break
                 control = random.choice(['OPEN','CLOSE'])                    
                 result = client.publish(TOPICS.control, control)
                 # result: [0, 1]
