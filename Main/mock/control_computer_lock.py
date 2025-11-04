@@ -13,9 +13,9 @@ def detection_login_attempts(msg):
         try:                                                            
             received_message = (msg.payload.decode())    
             if 'Login_attempts' in received_message:
-                metrics = json.loads(received_message)          #Generated data is formatted with json.dumps(), json.loads() turns back into python object able to be worked with
-                attempts = metrics.get('Login_attempts')        #get Login_attempts key value
-                if int(attempts) > 5:                           #convert to int, verify variable has exceeded limit
+                metrics = json.loads(received_message)        
+                attempts = metrics.get('Login_attempts')       
+                if int(attempts) > 5:                         
                     return True
             else:
                 return False
