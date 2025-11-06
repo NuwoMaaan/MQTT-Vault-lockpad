@@ -12,4 +12,12 @@ def console_out(result_status, result_metric, padlock_status_data, padlock_metri
     if publish_metrics_status == 0:
         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_metric_data}, topic: {TOPICS.metrics}\n\r")
     else:
-        print(f"Failed to send message to topic {TOPICS.metrics}")
+        print(f"Failed to send message")
+
+
+def handleheader(topic):
+        header_width = 41
+        header = (f"\n=============================================\n"
+            f"| {topic.ljust(header_width)} |\n"                         
+            f"=============================================\n")
+        print(header)
