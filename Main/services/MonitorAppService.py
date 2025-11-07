@@ -1,6 +1,5 @@
 
 import threading
-import keyboard
 from schemas.topics import TOPICS
 
 class MonitorService:
@@ -48,7 +47,7 @@ class MonitorService:
         def wait_for_exit():
             input()  # Wait for ENTER key
             app.current_mode = None
-            print('Exited receive mode.')
+            print('Exited receive mode')
         
         exit_thread = threading.Thread(target=wait_for_exit, daemon=True)
         exit_thread.start()
