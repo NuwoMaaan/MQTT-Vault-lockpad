@@ -16,8 +16,15 @@ def console_out(result_status, result_metric, padlock_status_data, padlock_metri
 
 
 def handleheader(topic):
-        header_width = 41
-        header = (f"\n=============================================\n"
-            f"| {topic.ljust(header_width)} |\n"                         
-            f"=============================================\n")
+        min_width = 20
+        padding = 4  
+        content_width = len(topic) + padding
+        header_width = max(min_width, content_width)
+        
+        # Create the border line
+        border = "=" * (header_width + 4)  # +4 for the | characters
+        
+        header = (f"\n{border}\n"
+            f"| {topic.center(header_width)} |\n"                         
+            f"{border}\n")
         print(header)
