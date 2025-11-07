@@ -31,7 +31,7 @@ class MonitorApp(MQTTApp):
             if self.current_mode == 'receive':                                           
                 handleheader(msg.topic)
                 print(self.messages[-1])                                             
-                print("IF BLANK PRESS 'ENTER' FOR PROMPT")                          
+                print("PRESS 'ENTER' TO EXIT RECEIVE MODE\n\r")                          
   
         client.subscribe(self.selected_topic)
         client.on_message = on_message

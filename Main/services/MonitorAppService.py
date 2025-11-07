@@ -25,6 +25,7 @@ class MonitorService:
 
     @staticmethod
     def subscribe_mode(app):
+        app.current_mode = 'subscribe'
         print("Topics:")
         for key in TOPICS:
             print(f"- {key}")
@@ -42,8 +43,15 @@ class MonitorService:
     def recv_mode(app):
         app.current_mode = 'receive'
         print('Receive Mode - Listening for messages...')
-        keyboard.read_key()
-        app.current_mode = None
+        print('Press ENTER to exit receive mode.')
+
+        def wait_for_exit():
+            input()  # Wait for ENTER key
+            app.current_mode = None
+            print('Exited receive mode.')
+        
+        exit_thread = threading.Thread(target=wait_for_exit, daemon=True)
+        exit_thread.start()
 
     @staticmethod
     def choice(app, mode_choice):
