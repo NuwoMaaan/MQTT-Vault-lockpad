@@ -1,4 +1,3 @@
-from typing import List
 from paho.mqtt import client as mqtt_client
 from utils.mqtt_app import MQTTApp
 from utils.signal_utils import shutdown_flag
@@ -10,7 +9,7 @@ class MonitorApp(MQTTApp):
         super().__init__()
         self.selected_topic = None
         self.current_mode = None
-        self.messages: List[str] = []
+        self.current_message = None  # Single message instead of list
 
     def publish(self, client: mqtt_client):                           
         message = input("Enter message to send: ")                
@@ -27,10 +26,10 @@ class MonitorApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             received_message = msg.payload.decode()
-            self.messages.append(f"Received '{received_message}'\n\r from topic: {msg.topic}\n\r")          
+            self.current_message = f"Received '{received_message}' from topic: {msg.topic}"          
             if self.current_mode == 'receive':                                           
                 handleheader(msg.topic)
-                print(self.messages[-1])                                             
+                print(self.current_message)
                 print("PRESS 'ENTER' TO EXIT RECEIVE MODE\n\r")                          
   
         client.subscribe(self.selected_topic)
@@ -40,7 +39,7 @@ class MonitorApp(MQTTApp):
         self.client.loop_start()
         try:
             while True:                                                        
-                mode_choice = input("MODE (recv|send|subscribe|exit): ").strip().lower()   #Prompting for mode, depending on mode, will determine what is                                                      
+                mode_choice = input("MODE (recv|send|subscribe|exit): ").strip().lower()                                                       
                 if mode_choice == "exit":
                     break
                 MonitorService.choice(self, mode_choice)
