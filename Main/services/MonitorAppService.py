@@ -17,7 +17,7 @@ class MonitorService:
 
         if hasattr(TOPICS, topic_choice):
             app.selected_topic = getattr(TOPICS, topic_choice)
-            threading.Thread(target=app.publish, args=(app.client,)).start()
+            app.publish(app.client)
         else:
             print("Invalid topic.")
             app.current_mode = None
@@ -33,7 +33,7 @@ class MonitorService:
             return
         if hasattr(TOPICS, topic_choice):
             app.selected_topic = getattr(TOPICS, topic_choice)
-            threading.Thread(target=app.subscribe, args=(app.client,)).start()
+            app.subscribe(app.client)
             print(f"Now subscribed to topic: {app.selected_topic}")
         else:
             print("Invalid topic.")
@@ -48,9 +48,9 @@ class MonitorService:
             input()  # Wait for ENTER key
             app.current_mode = None
             print('Exited receive mode')
-        
-        exit_thread = threading.Thread(target=wait_for_exit, daemon=True)
-        exit_thread.start()
+
+        threading.Thread(target=wait_for_exit, daemon=True).start()
+
 
     @staticmethod
     def choice(app, mode_choice):
