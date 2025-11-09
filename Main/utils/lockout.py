@@ -6,17 +6,17 @@ def publish_lockout(client):
     print(issue)
     client.publish(TOPICS.control, issue)               
 
-def detection_login_attempts(msg):
-     if (msg.topic) == TOPICS.metrics:
-        print(f"Received `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")                    
+def detection_login_attempts(msg) -> bool:
+    if (msg.topic) == TOPICS.metrics:                    
         try:                                                            
             received_message = (msg.payload.decode())    
-            if 'Login_attempts' in received_message:
-                metrics = json.loads(received_message)          
-                attempts = metrics.get('Login_attempts')        
-                if int(attempts) > 5:                           
+            if 'login_attempts' in received_message:
+                metrics = json.loads(received_message)        
+                attempts = metrics.get('login_attempts') 
+                if int(attempts) > 5:                         
                     return True
             else:
                 return False
         except Exception as error:
-            return error
+            print(f"Error processing message: {error}")
+            return False
