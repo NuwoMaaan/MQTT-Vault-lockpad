@@ -5,8 +5,6 @@ from mock.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, console_lock_out
 from utils.mqtt_app import MQTTApp
 from utils.lock_mechanism import detect_lock_mechanism, lock_mechanism
-import time
-
 
 generator = PadlockDataGenerator()
 
@@ -31,13 +29,7 @@ class MQTTPadlockApp(MQTTApp):
             if detect_lock_mechanism(msg):
                 lock_mechanism(generator)
                 console_lock_out(msg)
-                # Reset to lock state to continue mock functionality
-                # But also sleep to show lock state change to 'INDEFINITE_LOCKED'
-                # After 30 seconds, state returns to 'LOCKED'
-                time.sleep(30)
-                generator.state = "LOCKED"
                 
-
         client.subscribe(TOPICS.control)
         client.on_message = on_message
 

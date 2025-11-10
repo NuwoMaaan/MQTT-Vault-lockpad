@@ -1,5 +1,4 @@
 import random
-import json
 import psutil
 import time
 from datetime import datetime
