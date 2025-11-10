@@ -1,10 +1,20 @@
 import json
 from schemas.topics import TOPICS
+from schemas.controlcomputer import ControlComputerLock
+from pydantic import ValidationError
+             
 
-def publish_lockout(client):                                    
-    issue = (f'MAX ATTEMPTS EXCEED: Overriding lockout control - Access: LOCKED\nSending override to {TOPICS.control}')  
-    print(issue)
-    client.publish(TOPICS.control, issue)               
+def publish_lockout(client):
+    try:
+        data = ControlComputerLock(
+            id="control_1",
+            lock_state="INDEFINITE_LOCK"
+        )
+    except ValidationError as e:
+        print("Validation error:", e)
+        return None
+
+    client.publish(TOPICS.control, data.model_dump_json())
 
 def detection_login_attempts(msg) -> bool:
     if (msg.topic) == TOPICS.metrics:                    
@@ -20,3 +30,4 @@ def detection_login_attempts(msg) -> bool:
         except Exception as error:
             print(f"Error processing message: {error}")
             return False
+        

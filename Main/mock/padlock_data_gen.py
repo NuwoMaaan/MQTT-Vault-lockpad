@@ -18,7 +18,7 @@ class PadlockDataGenerator:
         self.cpu_formatted = None
         self.temperature = None
         # specific to status
-        self.state = "locked"
+        self.state = "LOCKED"
         self.last_unlock = None
         self.battery = "94%"
         self.error = None
