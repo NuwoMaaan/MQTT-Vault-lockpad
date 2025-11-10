@@ -2,13 +2,16 @@ from paho.mqtt import client as mqtt_client
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from mock.padlock_data_gen import PadlockDataGenerator
-from utils.console import console_padlock_out
+from utils.console import console_padlock_out, console_lock_out
 from utils.mqtt_app import MQTTApp
+from utils.lock_mechanism import detect_lock_mechanism, lock_mechanism
+import time
 
+
+generator = PadlockDataGenerator()
 
 class MQTTPadlockApp(MQTTApp):
     def publish(self, client: mqtt_client):
-        generator = PadlockDataGenerator()
         try:
             while not shutdown_flag.is_set():
                 # Generate padlock data
@@ -25,6 +28,15 @@ class MQTTPadlockApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"Received `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
+            if detect_lock_mechanism(msg):
+                lock_mechanism(generator)
+                console_lock_out(msg)
+                # Reset to lock state to continue mock functionality
+                # But also sleep to show lock state change to 'INDEFINITE_LOCKED'
+                # After 30 seconds, state returns to 'LOCKED'
+                time.sleep(30)
+                generator.state = "LOCKED"
+                
 
         client.subscribe(TOPICS.control)
         client.on_message = on_message

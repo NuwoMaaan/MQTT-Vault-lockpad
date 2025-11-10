@@ -1,6 +1,6 @@
 
 from schemas.topics import TOPICS
-from schemas.controlcomputer import ControlComputerKeepAlive
+from schemas.controlcomputer import ControlComputerKeepAlive, ControlComputerLock
 from pydantic import ValidationError
 import time
 
@@ -22,5 +22,7 @@ class ControlDataGenerator:
             return None
         
         return data.model_dump_json()
+    
+    
 
       
