@@ -13,11 +13,14 @@ class PadlockDataGenerator:
         self.id = "padlock_1"
         self.timestamp = None
         # specific to metrics
-        self.login_attempts = 1
+        self.unlock_attempts = 1
         self.netstats = {}
         self.cpu_formatted = None
+        self.temperature = None
         # specific to status
         self.state = "locked"
+        self.last_unlock = None
+        self.battery = "94%"
         self.error = None
 
     
@@ -30,6 +33,8 @@ class PadlockDataGenerator:
             data = VaultPadlockStatus(
                 id=self.id,
                 state=self.state,
+                last_unlock=self.last_unlock,
+                battery=self.battery,
                 error=self.error,
                 timestamp=self.timestamp,
                 )
@@ -44,7 +49,8 @@ class PadlockDataGenerator:
         time.sleep(5)
         self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cpu = psutil.cpu_percent(interval=None)
-        self.cpu_formatted = f"{cpu:.2f}"
+        self.cpu_formatted = f"{cpu:.2f}%"
+        self.temperature = f"{random.randint(30, 40)} C"
         network = psutil.net_io_counters()
         self.netstats = {
             "Packets_recv": str(network.packets_recv),
@@ -52,16 +58,17 @@ class PadlockDataGenerator:
             "Network_Errors": str(network.errin)                                  
         }
 
-        if self.login_attempts == 6:
-            self.login_attempts = 1
+        if self.unlock_attempts == 6:
+            self.unlock_attempts = 1
         else:
-            self.login_attempts += 1
+            self.unlock_attempts += 1
 
         try:
             data = VaultPadlockMetrics(
                 id=self.id,
                 cpu=self.cpu_formatted,
-                login_attempts=self.login_attempts,
+                temperature=self.temperature,
+                unlock_attempts=self.unlock_attempts,
                 netstats=self.netstats,
                 timestamp=self.timestamp,
                 )

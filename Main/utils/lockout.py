@@ -10,9 +10,9 @@ def detection_login_attempts(msg) -> bool:
     if (msg.topic) == TOPICS.metrics:                    
         try:                                                            
             received_message = (msg.payload.decode())    
-            if 'login_attempts' in received_message:
+            if 'unlock_attempts' in received_message:
                 metrics = json.loads(received_message)        
-                attempts = metrics.get('login_attempts') 
+                attempts = metrics.get('unlock_attempts') 
                 if int(attempts) > 5:                         
                     return True
             else:
