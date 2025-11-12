@@ -7,13 +7,13 @@ from utils.lockout import publish_lockout, detection_login_attempts
 from utils.mqtt_app import MQTTApp
 
 
-control_data_generator = ControlDataGenerator()
+generator = ControlDataGenerator()
 
 class MQTTControlComputerApp(MQTTApp):
     def publish(self, client: mqtt_client): 
         try:
             while not shutdown_flag.is_set():
-                control_data = control_data_generator.generate_control_data() # Mock keepalive
+                control_data = generator.generate_control_data() # Mock keepalive
                 result_control = client.publish(TOPICS.control, control_data)
                 console_control_out(result_control, control_data)
         except KeyboardInterrupt:
@@ -23,7 +23,7 @@ class MQTTControlComputerApp(MQTTApp):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
             if detection_login_attempts(msg):                                      
-                publish_lockout(client)
+                publish_lockout(client, generator)
 
         client.subscribe(TOPICS.status)                              
         client.subscribe(TOPICS.metrics)    

@@ -23,6 +23,18 @@ class ControlDataGenerator:
         
         return data.model_dump_json()
     
+    def generate_lock_data(self): 
+        try:
+            data = ControlComputerLock(
+                id="control_1",
+                lock_state="INDEFINITE_LOCK"
+            )
+        except ValidationError as e:
+            print("Validation error:", e)
+            return None
+        
+        return data.model_dump_json()
+    
     
 
       
