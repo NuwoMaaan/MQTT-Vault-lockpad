@@ -1,5 +1,5 @@
 from paho.mqtt import client as mqtt_client
-from utils.mqtt_app import MQTTApp
+from app.mqtt_app import MQTTApp
 from utils.signal_utils import shutdown_flag
 from services.MonitorAppService import MonitorService
 from utils.console import handleheader, ascii_art

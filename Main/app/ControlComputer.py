@@ -4,7 +4,7 @@ from utils.console import console_control_out, ascii_art
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from utils.lockout import publish_lockout, detection_login_attempts
-from utils.mqtt_app import MQTTApp
+from app.mqtt_app import MQTTApp
 
 
 generator = ControlDataGenerator()
