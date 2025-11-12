@@ -2,7 +2,7 @@ from paho.mqtt import client as mqtt_client
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from mock.padlock_data_gen import PadlockDataGenerator
-from utils.console import console_padlock_out
+from utils.console import console_padlock_out, ascii_art
 from utils.mqtt_app import MQTTApp
 from utils.lock_mechanism import detect_lock_mechanism, lock_mechanism
 import time
@@ -36,6 +36,7 @@ class MQTTPadlockApp(MQTTApp):
 
 def main():
     app = MQTTPadlockApp()
+    ascii_art()
     app.run()
 
 if __name__ == '__main__':

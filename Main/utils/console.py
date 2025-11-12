@@ -40,3 +40,12 @@ def handleheader(topic):
             f"| {topic.center(header_width)} |\n"                         
             f"{border}\n")
         print(header)
+
+def ascii_art():
+    art = r"""
+  __  __  ___ _____ _____     _             
+ |  \/  |/ _ \_   _|_   _|   /_\  _ __ _ __ 
+ | |\/| | (_) || |   | |    / _ \| '_ \ '_ \
+ |_|  |_|\__\_\|_|   |_|   /_/ \_\ .__/ .__/
+                                 |_|  |_|   """
+    print(art)

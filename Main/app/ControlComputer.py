@@ -1,6 +1,6 @@
 from paho.mqtt import client as mqtt_client
 from mock.control_data_gen import ControlDataGenerator
-from utils.console import console_control_out
+from utils.console import console_control_out, ascii_art
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from utils.lockout import publish_lockout, detection_login_attempts
@@ -32,6 +32,7 @@ class MQTTControlComputerApp(MQTTApp):
 
 def main():
     app = MQTTControlComputerApp()
+    ascii_art()
     app.run()
     
 
