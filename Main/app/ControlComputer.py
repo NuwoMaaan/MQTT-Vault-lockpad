@@ -25,8 +25,6 @@ class MQTTControlComputerApp(MQTTApp):
             if detection_login_attempts(msg):                                      
                 publish_lockout(client)
 
-            
-
         client.subscribe(TOPICS.status)                              
         client.subscribe(TOPICS.metrics)    
         client.on_message = on_message
