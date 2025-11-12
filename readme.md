@@ -1,6 +1,8 @@
 ## Overview
 
-**MQTT Vault Lockpad** is a distributed IoT security system that monitors and controls a vault padlock using MQTT messaging. The system consists of three main applications that communicate over MQTT topics to manage authentication, access control, and security lockout mechanisms.
+**MQTT** MQTT (Message Queuing Telemetry Transport) is a lightweight, publish–subscribe messaging protocol used for reliable communication between devices in distributed systems. It operates through a central broker that manages message exchange between clients, allowing devices to publish data to topics and subscribe to receive updates. This design enables efficient, real-time, and scalable communication, making MQTT widely used in IoT, automation, and remote monitoring applications.
+
+**MQTT Vault Lockpad** Implements MQTT communications and detects access attempts limit and indefinitely locks the lockpad, this is demonstrated through mock data generation and continously loops. The Monitor application allows for selectively subscribing to topics to view communications and send message to any specificied topic. 
 
 ### System Components
 
