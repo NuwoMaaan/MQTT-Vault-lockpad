@@ -9,7 +9,7 @@ class MonitorApp(MQTTApp):
         super().__init__()
         self.selected_topic = None
         self.current_mode = None
-        self.current_message = None  # Single message instead of list
+        self.current_message = None 
 
     def publish(self, client: mqtt_client):                           
         message = input("Enter message to send: ")                

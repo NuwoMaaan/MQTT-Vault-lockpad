@@ -1,5 +1,4 @@
 import random
-import json
 import psutil
 import time
 from datetime import datetime
@@ -58,7 +57,7 @@ class PadlockDataGenerator:
             "Network_Errors": str(network.errin)                                  
         }
 
-        if self.unlock_attempts == 6:
+        if self.unlock_attempts == 6: 
             self.unlock_attempts = 1
         else:
             self.unlock_attempts += 1

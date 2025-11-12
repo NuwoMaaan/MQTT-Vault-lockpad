@@ -23,7 +23,7 @@ def console_control_out(result_control, control_data):
     else:
         print(f"Failed to send message to topic {TOPICS.control}")
 
-def console_lock_out(msg):
+def console_lock_out():
     print(f"LOCKOUT TRIGGERED: Vault Padlock is now: INDEFINITE_LOCKED\n\r")
 
 
