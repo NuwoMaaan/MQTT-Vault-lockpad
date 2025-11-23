@@ -1,6 +1,8 @@
 from paho.mqtt import client as mqtt_client
 from app.mqtt_app import MQTTApp
 from utils.signal_utils import shutdown_flag
+from schemas.user_input import U_INPUT
+from schemas.modes import MODE
 from services.MonitorAppService import MonitorService
 from utils.console import handleheader, ascii_art
 
@@ -28,7 +30,7 @@ class MonitorApp(MQTTApp):
         def on_message(client, userdata, msg):
             received_message = msg.payload.decode()
             self.current_message = f"Received '{received_message}' from topic: {msg.topic}"          
-            if self.current_mode == 'receive':                                           
+            if self.current_mode == MODE.receive:                                           
                 handleheader(msg.topic)
                 print(self.current_message)
                 print("PRESS 'ENTER' TO EXIT RECEIVE MODE\n\r")                          
@@ -40,11 +42,11 @@ class MonitorApp(MQTTApp):
         self.client.loop_start()
         try:
             while True:                                                        
-                mode_choice = input("MODE (recv|send|subscribe|exit): ").strip().lower()                                                       
-                if mode_choice == "exit":
+                mode_choice = input("MODE (recv|pub|sub|exit): ").strip().lower()                                                       
+                if mode_choice == U_INPUT.exit:
                     break
                 MonitorService.choice(self, mode_choice)
-                if mode_choice == '':                                             
+                if mode_choice == U_INPUT.empty:                                             
                     pass
         except KeyboardInterrupt:
             print("KeyboardInterrupt, shutting down...")

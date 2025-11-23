@@ -13,7 +13,7 @@ def signal_handler(sig, frame):
 def setup_signal_handlers():
     """Set up signal handlers for graceful shutdown"""
     signal.signal(signal.SIGINT, signal_handler)
-    if hasattr(signal, 'SIGTERM'):  # SIGTERM might not be available on Windows
+    if hasattr(signal, 'SIGTERM'):  
         signal.signal(signal.SIGTERM, signal_handler)
 
 def is_shutting_down():
