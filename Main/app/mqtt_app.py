@@ -5,9 +5,10 @@ from connections.connect import connect_mqtt
 from utils.signal_utils import setup_signal_handlers, shutdown_flag 
 
 class MQTTApp(ABC):
-    def __init__(self):
+    def __init__(self, id: str):
         setup_signal_handlers()
         self.client = connect_mqtt()
+        self.id = id
 
     @abstractmethod
     def publish(self):

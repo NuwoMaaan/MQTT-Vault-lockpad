@@ -1,22 +1,27 @@
 from paho.mqtt import client as mqtt_client
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
-from mock.padlock_data_gen import PadlockDataGenerator
+from data.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, ascii_art
 from app.mqtt_app import MQTTApp
 from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 
 
-generator = PadlockDataGenerator()
+
 
 class MQTTPadlockApp(MQTTApp):
+    def __init__(self, id: str, data: PadlockDataGenerator):
+        super().__init__(id)
+        self.data = data
+
+
     def publish(self, client: mqtt_client):
         try:
             while not shutdown_flag.is_set():
                 # Generate padlock data
-                padlock_status_data = generator.generate_padlock_status_data()
-                padlock_metric_data = generator.generate_padlock_metric_data()
-                padlock_event_data = generator.generate_padlock_event_data()
+                padlock_status_data = self.data.generate_padlock_status_data()
+                padlock_metric_data = self.data.generate_padlock_metric_data()
+                padlock_event_data = self.data.generate_padlock_event_data()
 
                 result_status = client.publish(TOPICS.status, padlock_status_data)
                 result_metric = client.publish(TOPICS.metrics, padlock_metric_data)
@@ -33,13 +38,13 @@ class MQTTPadlockApp(MQTTApp):
         def on_message(client, userdata, msg):
             print(f"Received `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
             if detect_lock_mechanism(msg):
-                lock_mechanism(generator)
+                lock_mechanism(self.data)
                 
         client.subscribe(TOPICS.control)
         client.on_message = on_message
 
 def main():
-    app = MQTTPadlockApp()
+    app = MQTTPadlockApp(id="vault_lock_01", data=PadlockDataGenerator())
     ascii_art()
     app.run()
 

@@ -1,5 +1,5 @@
 from paho.mqtt import client as mqtt_client
-from mock.control_data_gen import ControlDataGenerator
+from data.control_data_gen import ControlDataGenerator
 from utils.console import console_control_out, ascii_art
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
@@ -7,9 +7,11 @@ from lock.lockout import publish_lockout, detection_login_attempts
 from app.mqtt_app import MQTTApp
 
 
-generator = ControlDataGenerator()
-
 class MQTTControlComputerApp(MQTTApp):
+    def __init__(self, id: str, data: ControlDataGenerator):
+        super().__init__(id)
+        self.data = data
+        
     def publish(self, client: mqtt_client): 
         try:
             while not shutdown_flag.is_set():
@@ -24,8 +26,7 @@ class MQTTControlComputerApp(MQTTApp):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
             if detection_login_attempts(msg):                                   
-                publish_lockout(client, generator)
-
+                publish_lockout(client, self.data)
 
         client.subscribe(TOPICS.status)                              
         client.subscribe(TOPICS.metrics)
@@ -34,7 +35,7 @@ class MQTTControlComputerApp(MQTTApp):
 
 
 def main():
-    app = MQTTControlComputerApp()
+    app = MQTTControlComputerApp(id="control_device_01", data=ControlDataGenerator())
     ascii_art()
     app.run()
     

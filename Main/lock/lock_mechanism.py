@@ -1,6 +1,6 @@
 
 from schemas.topics import TOPICS
-from mock.padlock_data_gen import PadlockDataGenerator
+from data.padlock_data_gen import PadlockDataGenerator
 import json, time
 from utils.console import console_lock_out
 
