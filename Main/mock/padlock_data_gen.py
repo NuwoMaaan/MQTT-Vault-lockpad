@@ -2,7 +2,7 @@ import random
 import psutil
 import time
 from datetime import datetime
-from schemas.vaultpadlock import VaultPadlockMetrics, VaultPadlockStatus
+from schemas.vaultpadlock import VaultPadlockMetrics, VaultPadlockStatus, VaultPadlockEvents
 from pydantic import ValidationError
 
 
@@ -57,17 +57,11 @@ class PadlockDataGenerator:
             "Network_Errors": str(network.errin)                                  
         }
 
-        if self.unlock_attempts == 6: 
-            self.unlock_attempts = 1
-        else:
-            self.unlock_attempts += 1
-
         try:
             data = VaultPadlockMetrics(
                 id=self.id,
                 cpu=self.cpu_formatted,
                 temperature=self.temperature,
-                unlock_attempts=self.unlock_attempts,
                 netstats=self.netstats,
                 timestamp=self.timestamp,
                 )
@@ -76,4 +70,22 @@ class PadlockDataGenerator:
             return None
         
         return data.model_dump_json()
+
+    def generate_padlock_event_data(self) -> VaultPadlockEvents:
+        time.sleep(5)
+        if self.unlock_attempts == 6: 
+            self.unlock_attempts = 1
+        else:
+            self.unlock_attempts += 1
+
+        try:
+            data = VaultPadlockEvents(
+                id=self.id,
+                event="access_attempt",
+                result="fail"
+            )
+        except ValidationError as e:
+            print("Validation Error:", e)
+            return None
         
+        return data.model_dump_json()

@@ -4,7 +4,7 @@ from utils.signal_utils import shutdown_flag
 from mock.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, ascii_art
 from app.mqtt_app import MQTTApp
-from utils.lock_mechanism import detect_lock_mechanism, lock_mechanism
+from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 
 
 generator = PadlockDataGenerator()
@@ -16,11 +16,16 @@ class MQTTPadlockApp(MQTTApp):
                 # Generate padlock data
                 padlock_status_data = generator.generate_padlock_status_data()
                 padlock_metric_data = generator.generate_padlock_metric_data()
+                padlock_event_data = generator.generate_padlock_event_data()
 
                 result_status = client.publish(TOPICS.status, padlock_status_data)
                 result_metric = client.publish(TOPICS.metrics, padlock_metric_data)
+                result_event = client.publish(TOPICS.event, padlock_event_data)
 
-                console_padlock_out(result_status, result_metric, padlock_status_data, padlock_metric_data)
+                console_padlock_out(result_status, padlock_status_data,
+                                    result_metric,  padlock_metric_data,
+                                    result_event, padlock_event_data
+                )
         except KeyboardInterrupt:
             print('programmed stopped')
             
@@ -31,7 +36,6 @@ class MQTTPadlockApp(MQTTApp):
                 lock_mechanism(generator)
                 
         client.subscribe(TOPICS.control)
-        client.subscribe(TOPICS.lockout)
         client.on_message = on_message
 
 def main():

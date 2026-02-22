@@ -3,7 +3,7 @@ from mock.control_data_gen import ControlDataGenerator
 from utils.console import console_control_out, ascii_art
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
-from utils.lockout import publish_lockout, detection_login_attempts
+from lock.lockout import publish_lockout, detection_login_attempts
 from app.mqtt_app import MQTTApp
 
 
@@ -13,20 +13,23 @@ class MQTTControlComputerApp(MQTTApp):
     def publish(self, client: mqtt_client): 
         try:
             while not shutdown_flag.is_set():
-                control_data = generator.generate_control_data() # Mock keepalive
-                result_control = client.publish(TOPICS.control, control_data)
-                console_control_out(result_control, control_data)
+                # control_data = generator.generate_control_data() # Mock keepalive
+                # result_control = client.publish(TOPICS.control, control_data)
+                # console_control_out(result_control, control_data)
+                pass
         except KeyboardInterrupt:
             print('Program Stopped')
 
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
-            if detection_login_attempts(msg):                                      
+            if detection_login_attempts(msg):                                   
                 publish_lockout(client, generator)
 
+
         client.subscribe(TOPICS.status)                              
-        client.subscribe(TOPICS.metrics)    
+        client.subscribe(TOPICS.metrics)
+        client.subscribe(TOPICS.event)  
         client.on_message = on_message
 
 

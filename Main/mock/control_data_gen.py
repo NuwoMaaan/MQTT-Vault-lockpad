@@ -1,33 +1,17 @@
 
-from schemas.topics import TOPICS
-from schemas.controlcomputer import ControlComputerKeepAlive, ControlComputerLock
+from schemas.controlcomputer import ControlComputerLock
 from pydantic import ValidationError
-import time
 
 class ControlDataGenerator:
     def __init__(self):
         pass
-
-    def generate_control_data(self):
-        time.sleep(25)
-        message = 'KEEPALIVE'
-    
-        try:
-            data = ControlComputerKeepAlive(
-                id="control_1",
-                keepalive=message
-            )
-        except ValidationError as e:
-            print("Validation error:", e)
-            return None
-        
-        return data.model_dump_json()
     
     def generate_lock_data(self): 
         try:
             data = ControlComputerLock(
                 id="control_1",
-                lock_state="INDEFINITE_LOCK"
+                lock_state="INDEFINITE_LOCK",
+                reason="brute force attempt"
             )
         except ValidationError as e:
             print("Validation error:", e)
