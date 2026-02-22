@@ -4,13 +4,13 @@ from utils.console import ascii_art
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from lock.lockout import publish_lockout, detection_login_attempts
-from app.mqtt_app import MQTTApp
+from app.MqttApp import MQTTApp
 
 
 class MQTTControlComputerApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
-        self.data = ControlDataGenerator(device_id=self.id)
+        self.data = ControlDataGenerator()
         
     def publish(self, client: mqtt_client): 
         try:
@@ -26,7 +26,7 @@ class MQTTControlComputerApp(MQTTApp):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
             if detection_login_attempts(msg):                                   
-                publish_lockout(client, self.data)
+                publish_lockout(client, self.data, msg.topic, self.id)
 
         client.subscribe(TOPICS.status)                              
         client.subscribe(TOPICS.metrics)

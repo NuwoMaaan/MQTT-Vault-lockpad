@@ -1,5 +1,5 @@
 from paho.mqtt import client as mqtt_client
-from app.mqtt_app import MQTTApp
+from app.MqttApp import MQTTApp
 from utils.signal_utils import shutdown_flag
 from schemas.user_input import U_INPUT
 from schemas.modes import MODE

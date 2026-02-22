@@ -3,9 +3,8 @@ from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from data.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, ascii_art
-from app.mqtt_app import MQTTApp
+from app.MqttApp import MQTTApp
 from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
-
 
 
 
@@ -41,6 +40,7 @@ class MQTTPadlockApp(MQTTApp):
                 lock_mechanism(self.data)
                 
         client.subscribe(TOPICS.control)
+        client.subscribe(f"vault/padlock/{self.id}")
         client.on_message = on_message
 
 def main():

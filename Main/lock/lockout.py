@@ -5,10 +5,11 @@ from utils.console import console_lock_out
 
 fail_count = 0
 
-def publish_lockout(client, generator: ControlComputerLock):
-    lockout = generator.generate_lock_data()
+def publish_lockout(client, generator: ControlComputerLock, topic: str, device_id: str):
+    lockout = generator.generate_lock_data(device_id)
     if lockout:
-        client.publish(TOPICS.control, lockout)
+        # lockpad's id topic: f"vault/padlock/{self.id}"
+        client.publish(topic, lockout)
         console_lock_out()
 
 def detection_login_attempts(msg) -> bool:

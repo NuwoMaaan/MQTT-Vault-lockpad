@@ -3,14 +3,13 @@ from schemas.controlcomputer import ControlComputerLock
 from pydantic import ValidationError
 
 class ControlDataGenerator:
-    def __init__(self, device_id):
-        self.device_id = device_id
+    def __init__(self):
+        pass
     
-    
-    def generate_lock_data(self): 
+    def generate_lock_data(self, device_id): 
         try:
             data = ControlComputerLock(
-                id=self.device_id,
+                id=device_id,
                 lock_state="INDEFINITE_LOCK",
                 reason="brute force attempt"
             )

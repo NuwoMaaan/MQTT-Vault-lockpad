@@ -19,6 +19,7 @@ class MQTTApp(ABC):
         pass
 
     def run(self):
+        print(f"Device_id: {self.id}")
         threading.Thread(target=self.publish, args=(self.client,)).start()
         threading.Thread(target=self.subscribe, args=(self.client,)).start()
 
