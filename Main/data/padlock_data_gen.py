@@ -7,9 +7,9 @@ from pydantic import ValidationError
 
 
 class PadlockDataGenerator:
-    def __init__(self):
+    def __init__(self, device_id):
         # common attributes
-        self.id = "padlock_1"
+        self.device_id = device_id
         self.timestamp = None
         # specific to metrics
         self.unlock_attempts = 1
@@ -30,7 +30,7 @@ class PadlockDataGenerator:
         self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             data = VaultPadlockStatus(
-                id=self.id,
+                id=self.device_id,
                 state=self.state,
                 last_unlock=self.last_unlock,
                 battery=self.battery,
@@ -59,7 +59,7 @@ class PadlockDataGenerator:
 
         try:
             data = VaultPadlockMetrics(
-                id=self.id,
+                id=self.device_id,
                 cpu=self.cpu_formatted,
                 temperature=self.temperature,
                 netstats=self.netstats,
@@ -73,14 +73,14 @@ class PadlockDataGenerator:
 
     def generate_padlock_event_data(self) -> VaultPadlockEvents:
         time.sleep(5)
-        if self.unlock_attempts == 6: 
+        if self.unlock_attempts == 3: 
             self.unlock_attempts = 1
         else:
             self.unlock_attempts += 1
 
         try:
             data = VaultPadlockEvents(
-                id=self.id,
+                id=self.device_id,
                 event="access_attempt",
                 result="fail"
             )

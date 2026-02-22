@@ -1,6 +1,6 @@
 from paho.mqtt import client as mqtt_client
 from data.control_data_gen import ControlDataGenerator
-from utils.console import console_control_out, ascii_art
+from utils.console import ascii_art
 from schemas.topics import TOPICS
 from utils.signal_utils import shutdown_flag
 from lock.lockout import publish_lockout, detection_login_attempts
@@ -8,9 +8,9 @@ from app.mqtt_app import MQTTApp
 
 
 class MQTTControlComputerApp(MQTTApp):
-    def __init__(self, id: str, data: ControlDataGenerator):
+    def __init__(self, id: str):
         super().__init__(id)
-        self.data = data
+        self.data = ControlDataGenerator(device_id=self.id)
         
     def publish(self, client: mqtt_client): 
         try:
@@ -35,7 +35,7 @@ class MQTTControlComputerApp(MQTTApp):
 
 
 def main():
-    app = MQTTControlComputerApp(id="control_device_01", data=ControlDataGenerator())
+    app = MQTTControlComputerApp(id="control_device_01")
     ascii_art()
     app.run()
     

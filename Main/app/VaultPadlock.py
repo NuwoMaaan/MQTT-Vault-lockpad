@@ -10,9 +10,9 @@ from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 
 
 class MQTTPadlockApp(MQTTApp):
-    def __init__(self, id: str, data: PadlockDataGenerator):
+    def __init__(self, id: str):
         super().__init__(id)
-        self.data = data
+        self.data = PadlockDataGenerator(device_id=self.id)
 
 
     def publish(self, client: mqtt_client):
@@ -44,7 +44,7 @@ class MQTTPadlockApp(MQTTApp):
         client.on_message = on_message
 
 def main():
-    app = MQTTPadlockApp(id="vault_lock_01", data=PadlockDataGenerator())
+    app = MQTTPadlockApp(id="vault_lock_01")
     ascii_art()
     app.run()
 

@@ -20,7 +20,7 @@ def detection_login_attempts(msg) -> bool:
             event = received_message['event']
             result = received_message['result'] 
             if event == 'access_attempt' and result == 'fail':
-                if fail_count > 5:
+                if fail_count > 3:
                     fail_count = 0
                     return True
                 else:
