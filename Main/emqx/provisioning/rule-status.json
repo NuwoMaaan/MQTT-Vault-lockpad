@@ -1,0 +1,8 @@
+{
+  "name": "vault_status_rule",
+  "enable": true,
+  "sql": "SELECT * FROM \"vault/padlock/status\"",
+  "actions": [
+    "mongodb:store_status"
+  ]
+}

@@ -11,4 +11,8 @@ class Settings(BaseSettings):
     MQTT_USERNAME: str 
     MQTT_PASSWORD: str
 
+    EMQX_URL: str
+    USER: str
+    PASS: str
+
 settings = Settings()

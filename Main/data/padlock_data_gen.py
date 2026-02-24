@@ -13,7 +13,6 @@ class PadlockDataGenerator:
         self.timestamp = None
         # specific to metrics
         self.unlock_attempts = 1
-        self.netstats = {}
         self.cpu_formatted = None
         self.temperature = None
         # specific to status
@@ -50,19 +49,12 @@ class PadlockDataGenerator:
         cpu = psutil.cpu_percent(interval=None)
         self.cpu_formatted = f"{cpu:.2f}%"
         self.temperature = f"{random.randint(30, 40)} C"
-        network = psutil.net_io_counters()
-        self.netstats = {
-            "Packets_recv": str(network.packets_recv),
-            "Packets_sent": str(network.packets_sent),
-            "Network_Errors": str(network.errin)                                  
-        }
 
         try:
             data = VaultPadlockMetrics(
                 id=self.device_id,
                 cpu=self.cpu_formatted,
                 temperature=self.temperature,
-                netstats=self.netstats,
                 timestamp=self.timestamp,
                 )
         except ValidationError as e:

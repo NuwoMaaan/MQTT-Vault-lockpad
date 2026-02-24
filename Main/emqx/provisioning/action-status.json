@@ -1,0 +1,20 @@
+{
+  "connector": "MongoDB",
+  "enable": true,
+  "name": "store_status",
+  "parameters": {
+    "collection": "status",
+    "payload_template": {
+      "clientid": "${clientid}",
+      "topic": "${topic}",
+      "qos": "${qos}",
+      "device_id": "${payload.id}",
+      "state": "${payload.state}",
+      "last_unlock": "${payload.last_unlock}",
+      "battery": "${payload.battery}",
+      "error": "${payload.error}",
+      "timestamp": "${payload.timestamp}"
+    }
+  },
+  "type": "mongodb"
+}

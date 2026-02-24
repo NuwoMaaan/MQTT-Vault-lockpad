@@ -5,7 +5,6 @@ class VaultPadlockMetrics(BaseModel):
     id: str
     cpu: str
     temperature: str
-    netstats: dict[str, str]
     timestamp: datetime
 
 class VaultPadlockStatus(BaseModel):
