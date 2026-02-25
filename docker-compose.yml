@@ -2,12 +2,12 @@ services:
   emqx:
     image: emqx/emqx:latest
     hostname: emqx_broker
-    restart: always
+    restart: unless-stopped
     ports:
       - "1883:1883"   # MQTT TCP port
-      - "8083:8083"   # MQTT WebSocket port
-      - "8084:8084"   # MQTT secure WebSocket port
-      - "8883:8883"   # MQTT SSL port
+      # - "8083:8083"   # MQTT WebSocket port
+      # - "8084:8084"   # MQTT secure WebSocket port
+      # - "8883:8883"   # MQTT SSL port
       - "18083:18083" # EMQX Dashboard port
     environment:
       # Set the dashboard admin password (default username is 'admin')

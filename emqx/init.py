@@ -1,39 +1,62 @@
 import requests
 import json
-
-from connections.config import settings
+import time
 from pathlib import Path
+from connections.config import settings
 
 BASE_DIR = Path(__file__).parent
-
 BASE_URL = settings.EMQX_URL
 USER = settings.USER
 PASS = settings.PASS
 
-def post(token, path, payload):
-    print(f"Configuring {path}")
-    r = requests.post(
-        BASE_URL + path,
-        headers={"Authorization": f"Bearer {token}"},
-        json=payload  
-    )
-    if r.status_code not in (200, 201, 204):
-        print(path, r.status_code, r.text)
-        r.raise_for_status()
+session = requests.Session()
+
+def post(path, payload):
+    print(f"Configuring {path}...")
+    
+    url = f"{BASE_URL}/{path}"
+    try:
+        response = session.post(url, json=payload, timeout=10)
+        
+        if response.status_code in (200, 201, 204):
+            print(f"Successfully configured {path}")
+        else:
+            print(f"Error on {path}: {response.status_code} - {response.text}")
+            response.raise_for_status()
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed for {path}: {e}")
+        raise
 
 def login():
-    print("Retrieving auth token...")
-    r = requests.post(
-        BASE_URL + "/login",
-        json={"username": USER, "password": PASS}
-    )
-    r.raise_for_status()
-    return r.json()["token"]
+    url = f"{BASE_URL}/login"
+    print(f"Attempting to login to {url}...")
+    
+    max_retries = 5
+    for i in range(max_retries):
+        try:
+            r = requests.post(url, json={"username": USER, "password": PASS}, timeout=5)
+            r.raise_for_status()
+            token = r.json().get("token")
+            print("Login successful. Token retrieved.")
+            
+            session.headers.update({"Authorization": f"Bearer {token}"})
+            return
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as e:
+            if i < max_retries - 1:
+                print(f"EMQX API not ready (Attempt {i+1}/{max_retries}). Retrying in 5s...")
+                time.sleep(5)
+            else:
+                print("Could not connect to EMQX API.")
+                raise e
 
 def load(p):
-    with open(BASE_DIR / p, "r") as f:
+    """Loads JSON from file and handles payload_template stringification."""
+    file_path = BASE_DIR / p
+    with open(file_path, "r") as f:
         data = json.load(f)
-        # Check if payload_template is a dict and stringify it
+        
+        # EMQX specific: parameters.payload_template must often be a stringified JSON
         if "parameters" in data and "payload_template" in data["parameters"]:
             template = data["parameters"]["payload_template"]
             if isinstance(template, dict):
@@ -41,32 +64,30 @@ def load(p):
         return data
 
 if __name__ == "__main__":
+    login()
 
-    #time.sleep(10)
+    provisioning_steps = [
+        ("authentication", "provisioning/auth.json"),
+        ("authentication/password_based:built_in_database/users", "provisioning/device-user.json"),
+        
+        ("connectors", "provisioning/mongo-connector.json"),
 
-    token = login()
+        ("actions", "provisioning/action-metrics.json"),
+        ("actions", "provisioning/action-event.json"),
+        ("actions", "provisioning/action-status.json"),
 
-    # 1. MQTT authentication backend
-    post(token, "/authentication", load("provisioning/auth.json"))
+        ("rules", "provisioning/rule-metrics.json"),
+        ("rules", "provisioning/rule-event.json"),
+        ("rules", "provisioning/rule-status.json"),
+    ]
 
-    # 2. MQTT device user
-    post(
-        token,
-        "/authentication/password_based:built_in_database/users",
-        load("provisioning/device-user.json")
-    )
+    for endpoint, file_path in provisioning_steps:
+        payload = load(file_path)
+        post(endpoint, payload)
 
-    # 3. Mongo connector
-    post(token, "/connectors", load("provisioning/mongo-connector.json"))
-
-    # 4. Actions
-    post(token, "/actions", load("provisioning/action-metrics.json"))
-    post(token, "/actions", load("provisioning/action-event.json"))
-    post(token, "/actions", load("provisioning/action-status.json"))
-
-    # 5. Rules
-    post(token, "/rules", load("provisioning/rule-metrics.json"))
-    post(token, "/rules", load("provisioning/rule-event.json"))
-    post(token, "/rules", load("provisioning/rule-status.json"))
-
-    print("EMQX provisioning finished.")
+    print(f"\nEMQX provisioning complete.")
+    print("Tasks configurations complete:")
+    print(" - Auth method & user client")
+    print(" - MongoDB connector established")
+    print(" - Actions setup")
+    print(" - Rules setup")

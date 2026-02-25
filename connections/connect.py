@@ -18,11 +18,21 @@ def connect_mqtt(client_id: str) -> mqtt_client:
     client = mqtt_client.Client(callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2, client_id=client_id)
     client.username_pw_set(username, password)
     client.on_connect = on_connect
-    # client.tls_set(
-    #     cert_reqs=ssl.CERT_REQUIRED,
-    #     tls_version=ssl.PROTOCOL_TLS_CLIENT
-    # )
-    # client.tls_insecure_set(False)
     client.connect(broker, port)
+
     return client
+
+# Uncomment this function and uncomment above if using EMQX cloud
+#
+# def connect_mqtt(client_id: str) -> mqtt_client:                              
+#     client = mqtt_client.Client(callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2, client_id=client_id)
+#     client.username_pw_set(username, password)
+#     client.on_connect = on_connect
+#     client.tls_set(
+#         cert_reqs=ssl.CERT_REQUIRED,
+#         tls_version=ssl.PROTOCOL_TLS_CLIENT
+#     )
+#     client.tls_insecure_set(False)
+#     client.connect(broker, port)
+#     return client
 
