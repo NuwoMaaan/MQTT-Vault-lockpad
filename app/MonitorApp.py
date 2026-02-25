@@ -8,8 +8,8 @@ from utils.console import handleheader, ascii_art
 
 
 class MonitorApp(MQTTApp):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id: str):
+        super().__init__(id)
         self.selected_topic = None
         self.current_mode = None
         self.current_message = None 
@@ -56,7 +56,7 @@ class MonitorApp(MQTTApp):
 
 if __name__ == '__main__':
 
-    app = MonitorApp()
+    app = MonitorApp(id="MQTT CLI Monitor Application")
     ascii_art()
     app.main_loop()
     

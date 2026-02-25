@@ -5,6 +5,7 @@ class Topics(BaseModel):
     event: str = "vault/padlock/event" # device -> broker -> control
     status: str = "vault/padlock/status"
     metrics: str = "vault/padlock/metrics"
-    control: str = "vault/padlock/control" # control -> broker -> device
+    control: str = "vault/padlock/control" # control -> broker -> device (Although no used, potentially useful in a 
+                                           # global push command if all devices subscribe to this topic)
 
 TOPICS = Topics()
