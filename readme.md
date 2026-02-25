@@ -1,116 +1,111 @@
 ## Overview
 
-**MQTT** MQTT (Message Queuing Telemetry Transport) is a lightweight, publish–subscribe messaging protocol used for reliable communication between devices in distributed systems. It operates through a central broker that manages message exchange between clients, allowing devices to publish data to topics and subscribe to receive updates. This design enables efficient, real-time, and scalable communication, making MQTT widely used in IoT, automation, and remote monitoring applications.
+**MQTT** (Message Queuing Telemetry Transport) is a lightweight, publish–subscribe messaging protocol used for reliable communication between devices in distributed systems. It operates through a central broker that manages message exchange between clients, allowing devices to publish data to topics and subscribe to receive updates. This design enables efficient, real-time, and scalable communication, making MQTT widely used in IoT, automation, and remote monitoring applications.
 
-**MQTT Vault Lockpad** Implements MQTT communications and detects access attempts limit and indefinitely locks the lockpad, this is demonstrated through mock data generation and continously loops. The Monitor application allows for selectively subscribing to topics to view communications and send message to any specificied topic. 
+**MQTT Vault Padlock** Is a project to demostrate MQTT communications and furthermore incorporate a data logging & visualization pipeline using `MongoDB` for long-lived storage, `Grafana` (Infinity) for enhanced visuals beyond EMQX dashboard and `FastAPI` backend for log retrieval from the MongoDB and then use in Grafana. `EMQX` is used as the MQTT broker as the community version `Docker` image, The setup for configurations neccessary for MQTT client connection(s) and MongoDB connector are automated in a init script using the default `.env` file.
+
+MQTT communications, is demonstrated through arbitrary data generation from `(VaultPadlock)`. Data is communicated to another MQTT app simulating a control device `(ControlComputer)`, it processes received data and detects a brute force attempt on the padlock and triggers a response to indefinitely lock. The Monitor application `(MonitorApp)` allows for selectively subscribing to topics to view communications and send message to any specificied topic, this is a basic CLI version of `MQTTX`. 
+
+Defined topics in this project follow the structure as: `vault/padlock/{endpoint}`
+
+**NOTE: This project has no pratical use as an effective vault lockpad system and does not inteface with hardware.**
+
+---
 
 ### System Components
 
 #### 1. **VaultPadlock** (`app/VaultPadlock.py`)
-The vault padlock device simulator that runs on the physical/mock padlock system.
+A simulation of IoT device sending data using MQTT protocol
 
 **Responsibilities:**
-- Generates mock padlock **status data** (locked/unlocked state, errors)
-- Generates mock padlock **metrics** (CPU, login attempts, network stats)
-- Publishes status and metrics to `TOPICS.status` and `TOPICS.metrics`
-- Subscribes to control commands from the Control Computer
+- Generates arbitrary data to send to control device.
 - Detects lockout triggers and enters **INDEFINITE_LOCKED** state when too many failed login attempts are detected
-- Displays lockout alerts in terminal without sending additional MQTT messages
+- Displays sending and recieving MQTT messages
 
 **Key Topics:**
-- **Publishes to:** `status`, `metrics`
-- **Subscribes to:** `control`, `lockout`
-
----
+- **Publishes to:** `status`, `metrics`, `event`
+- **Subscribes to:** `vault/padlock/{device_id}`
 
 #### 2. **ControlComputer** (`app/ControlComputer.py`)
 The central control system that monitors padlock health and enforces security policies.
 
 **Responsibilities:**
-- Publishes keepalive/control commands to the padlock
-- Subscribes to padlock status and metrics
-- Monitors `login_attempts` in metrics data
-- When login attempts exceed threshold (>5), publishes a lockout signal to trigger the indefinite lock mechanism
-- Logs all received messages and sent commands
+- Monitors access attempts by analysing event data
+- When attempts exceed threshold (>3), publishes a lockout signal to trigger the indefinite lock mechanism
+- Displays all received messages and sent commands
 
 **Key Topics:**
-- **Publishes to:** `control`, `lockout`
-- **Subscribes to:** `status`, `metrics`
-
----
+- **Publishes to:** `control`, `device_id`
+- **Subscribes to:** `status`, `metrics`, `event`
 
 #### 3. **MonitorApp** (`app/MonitorApp.py`)
-An interactive monitoring and debugging tool for observing system communication.
+An interactive monitoring for observing system communication.
 
 **Responsibilities:**
 - Allows manual monitoring of any MQTT topic in real-time
-- Supports both send and receive modes for topic inspection
+- Supports both send and receive modes
 
 ---
 
-### Security Features
+### **Indefinite Lockout Mechanism:**
 
-**Indefinite Lockout Mechanism:**
-- When the Control Computer detects > 5 login attempts, it publishes a lockout signal to `TOPICS.lockout`
-- The VaultPadlock receives this signal and immediately enters an indefinite locked state
+- When the Control Computer detects > 3 login attempts, it publishes a lockout message to the vault padlock.
 - The padlock sets its state to `"INDEFINITE_LOCKED"` with error message: `"ACCESS FAILURE: TOO MANY UNLOCK ATTEMPTS DETECTED"`
-- The system sleeps for 30 seconds to maintain the locked state, then returns to normal operation
-- (This is entirely for system demonstration purposes and has no real pratical security implications)
+- The system sleeps for 30 seconds to maintain the locked state, then returns and repeats.
+- (This is entirely for demonstration purposes and has no practical security implications)
 
 ---
 
 ### Data Flow
 
 ```
-VaultPadlock                    ControlComputer
-   |                                 |
-   |-- publish status/metrics ------>|
-   |                                 |
-   |<-- publish control commands ----|
-   |                                 |
-   |<-- publish lockout signal ------|  (when attempts > 5)
-   |
+VaultPadlock                       ControlComputer
+   |                                        |
+   | --- publish status,metrics,events ---> |
+   |                                        |
+   | <---  publish control commands ------  |
+   |                                        |
+   | <---   publish lockout signal  ------  |  (when attempts > 3)
+   |                                        |
    +-- enters INDEFINITE_LOCKED state
    +-- Will return to LOCKED and repeat
 ```
-
 ---
 
-### Technologies
+### Deployment Steps
 
-- **MQTT Broker:** Paho MQTT client library for Python
-- **Data Validation:** Pydantic for schema validation
-- **Threading:** Multi-threaded design for concurrent publish/subscribe operations
-- **Abstract Base Classes:** The system uses an abstract base class (MQTTApp) to define the core MQTT client behavior, enforcing implementation of essential methods - publish() and subscribe().
+1. **Docker compose deployment:**
+   ```
+   docker compose up 
+   ```
+2. **Init automation (Ensure EMQX container is healthy):**
+   ```
+   python -m emqx.init
 
----
+   (Note: This script does not need to be run again unless rebuilding containers or you have deleted EMQX container volumes)
+   ```
 
-### Running the Application
-
-Ensure you have an MQTT broker running (e.g., EMQX ) or cloud connection, then start:
-
-1. **VaultPadlock (in terminal 1):**
+3. **IoT devices (execute each in new terminal):**
    ```
    python -m app.VaultPadlock
-   ```
-
-2. **ControlComputer (in terminal 2):**
-   ```
    python -m app.ControlComputer
+   python -m app.MonitorApp (Optional)
    ```
-
-3. **MonitorApp (optional, in terminal 3):**
+4. **View EMQX dashboard & MongoDB:**
    ```
-   python -m app.MonitorApp
+   - search url: 'http://localhost:18083'
+   - Login into EMQX dashboard with default credentials (username: 'admin', password: 'password')
+   - MongoDB connection string: mongodb://admin:password@localhost:27017/VaultPadlock?authSource=admin
    ```
-
 ---
 
 ### Project Structure
 
 - `app/` — Main application modules (VaultPadlock, ControlComputer, MonitorApp)
-- `mock/` — Mock data generators for padlock and control messages
-- `schemas/` — Pydantic models for data validation (Topics, VaultPadlockMetrics, ControlComputerLock)
 - `connections/` — MQTT broker connection configuration
+- `data/` — data generators for padlock and control messages
+- `emqx`/  — Provisioning configurations & init automation
+- `lock`/  — Indefinite lock detection & enforcement logic
+- `schemas/` — Pydantic models for data validation 
+- `services/` — Monitor app logic for interface interaction 
 - `utils/` — Helper modules (console output, lockout detection, signal handling)
-- `services/` — Business logic services (MonitorAppService) 
