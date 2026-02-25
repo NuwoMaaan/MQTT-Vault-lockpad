@@ -73,7 +73,10 @@ VaultPadlock                       ControlComputer
 ---
 
 ### Deployment Steps
-
+0. **Preliminary:**
+   ```
+   Ensure Docker engine is running and python dependencies & requirements are installed (requirements.txt)
+   ```
 1. **Docker compose deployment:**
    ```
    docker compose up 
