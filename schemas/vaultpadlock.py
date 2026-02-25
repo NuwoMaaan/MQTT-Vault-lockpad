@@ -5,8 +5,6 @@ class VaultPadlockMetrics(BaseModel):
     id: str
     cpu: str
     temperature: str
-    unlock_attempts: int
-    netstats: dict[str, str]
     timestamp: datetime
 
 class VaultPadlockStatus(BaseModel):
@@ -16,3 +14,9 @@ class VaultPadlockStatus(BaseModel):
     battery: str
     error: str | None
     timestamp: datetime
+
+class VaultPadlockEvents(BaseModel):
+    id: str
+    event: str
+    result: str
+

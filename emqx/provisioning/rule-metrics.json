@@ -1,0 +1,8 @@
+{
+  "name": "vault_metrics_rule",
+  "enable": true,
+  "sql": "SELECT * FROM \"vault/padlock/metrics\"",
+  "actions": [
+    "mongodb:store_metrics"
+  ]
+}

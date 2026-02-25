@@ -1,0 +1,8 @@
+{
+  "name": "vault_event_rule",
+  "enable": true,
+  "sql": "SELECT * FROM \"vault/padlock/event\"",
+  "actions": [
+    "mongodb:store_events"
+  ]
+}

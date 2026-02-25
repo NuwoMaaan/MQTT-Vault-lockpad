@@ -1,0 +1,12 @@
+{ 
+  "database": "VaultPadlock",
+  "enable": true,
+  "name": "MongoDB",
+  "parameters": {
+    "mongo_type": "single",
+    "server": "mongo"
+  },
+  "password": "password",
+  "type": "mongodb",
+  "username": "admin"
+}

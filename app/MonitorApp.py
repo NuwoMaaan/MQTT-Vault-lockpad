@@ -1,5 +1,5 @@
 from paho.mqtt import client as mqtt_client
-from app.mqtt_app import MQTTApp
+from app.MqttApp import MQTTApp
 from utils.signal_utils import shutdown_flag
 from schemas.user_input import U_INPUT
 from schemas.modes import MODE
@@ -8,8 +8,8 @@ from utils.console import handleheader, ascii_art
 
 
 class MonitorApp(MQTTApp):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id: str):
+        super().__init__(id)
         self.selected_topic = None
         self.current_mode = None
         self.current_message = None 
@@ -56,7 +56,7 @@ class MonitorApp(MQTTApp):
 
 if __name__ == '__main__':
 
-    app = MonitorApp()
+    app = MonitorApp(id="MQTT CLI Monitor Application")
     ascii_art()
     app.main_loop()
     

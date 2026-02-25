@@ -1,6 +1,4 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Any
-
 
 class Settings(BaseSettings):
 
@@ -10,5 +8,9 @@ class Settings(BaseSettings):
     MQTT_PORT: int 
     MQTT_USERNAME: str 
     MQTT_PASSWORD: str
+
+    EMQX_URL: str
+    USER: str
+    PASS: str
 
 settings = Settings()

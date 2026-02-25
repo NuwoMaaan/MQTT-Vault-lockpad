@@ -1,0 +1,17 @@
+{
+  "connector": "MongoDB",
+  "enable": true,
+  "name": "store_events",
+  "parameters": {
+    "collection": "events",
+    "payload_template": {
+      "clientid": "${clientid}",
+      "topic": "${topic}",
+      "qos": "${qos}",
+      "device_id": "${payload.id}",
+      "event": "${payload.event}",
+      "result": "${payload.result}"
+    }
+  },
+  "type": "mongodb"
+}

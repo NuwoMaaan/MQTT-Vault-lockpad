@@ -1,0 +1,18 @@
+{
+  "connector": "MongoDB",
+  "enable": true,
+  "name": "store_metrics",
+  "parameters": {
+    "collection": "metrics",
+    "payload_template": {
+      "clientid": "${clientid}",
+      "topic": "${topic}",
+      "qos": "${qos}",
+      "device_id": "${payload.id}",
+      "cpu": "${payload.cpu}",
+      "temperature": "${payload.temperature}",
+      "timestamp": "${payload.timestamp}"
+    }
+  },
+  "type": "mongodb"
+}
