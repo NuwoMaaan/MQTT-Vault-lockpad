@@ -6,6 +6,7 @@ class UserInput(BaseModel):
     receive: str = "recv"
     publish: str = "pub"
     subscribe: str = "sub"
+    unsubscribe: str = "del-sub"
     empty: str = ""
 
 U_INPUT = UserInput()

@@ -10,9 +10,10 @@ from utils.console import handleheader, ascii_art
 class MonitorApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
-        self.selected_topic = None
-        self.current_mode = None
-        self.current_message = None 
+        self.selected_topic: str = None
+        self.current_mode: str = None
+        self.current_message: str = None 
+        self.sub_list: list[str] = []
 
     def publish(self, client: mqtt_client):                           
         message = input("Enter message to send: ")                
@@ -26,6 +27,7 @@ class MonitorApp(MQTTApp):
     
         self.current_mode = None
 
+
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             received_message = msg.payload.decode()
@@ -37,12 +39,17 @@ class MonitorApp(MQTTApp):
   
         client.subscribe(self.selected_topic)
         client.on_message = on_message
+    
+    def unsubscribe(self, client: mqtt_client):
+        client.unsubscribe(self.selected_topic)
+        
 
     def main_loop(self):
+        print(self.id)
         self.client.loop_start()
         try:
             while True:                                                        
-                mode_choice = input("MODE (recv|pub|sub|exit): ").strip().lower()                                                       
+                mode_choice = input("MODE (recv|pub|sub|del-sub|exit): ").strip().lower()                                                       
                 if mode_choice == U_INPUT.exit:
                     break
                 MonitorService.choice(self, mode_choice)
