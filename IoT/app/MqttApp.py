@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
 import threading
-from connections.connect import connect_mqtt
+from connection.connect import connect_mqtt
 from utils.signal_utils import setup_signal_handlers, shutdown_flag 
 
 class MQTTApp(ABC):

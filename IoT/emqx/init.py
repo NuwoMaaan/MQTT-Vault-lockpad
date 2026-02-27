@@ -2,7 +2,7 @@ import requests
 import json
 import time
 from pathlib import Path
-from connections.config import settings
+from connection.config import settings
 
 BASE_DIR = Path(__file__).parent
 BASE_URL = settings.EMQX_URL

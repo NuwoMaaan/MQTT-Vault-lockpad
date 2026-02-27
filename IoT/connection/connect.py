@@ -1,6 +1,6 @@
 from paho.mqtt import client as mqtt_client
 import random, ssl
-from connections.config import settings
+from connection.config import settings
 
 # client_id = f'subscribe-{random.randint(0, 1000)}'
 username = settings.MQTT_USERNAME
