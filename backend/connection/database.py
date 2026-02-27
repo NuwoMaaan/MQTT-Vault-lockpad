@@ -1,10 +1,6 @@
 import time
 from pymongo import MongoClient, errors
-from config import settings
-
-URI = settings.URI
-DB = settings.DB
-COLLECTION = settings.COLLECTION
+from connection.config import settings
 
 def connect_mongo(uri, max_retries=3, delay=10) -> MongoClient:
     retries = 0
@@ -24,8 +20,8 @@ def connect_mongo(uri, max_retries=3, delay=10) -> MongoClient:
 
 def get_db_conn() -> MongoClient:
     try:
-        mongo_client = connect_mongo(settings.URI)
-        return mongo_client["VaultPadlock"]
+        mongo_client = connect_mongo(settings.MONGO_URI)
+        return mongo_client[settings.MONGO_DB]
     except Exception as e:
         print(f"Failed to connect to MongoDB: {e}")
 
