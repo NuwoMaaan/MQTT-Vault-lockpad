@@ -65,6 +65,7 @@ class PadlockDataGenerator:
 
     def generate_padlock_event_data(self) -> VaultPadlockEvents:
         time.sleep(5)
+        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if self.unlock_attempts == 3: 
             self.unlock_attempts = 1
         else:
@@ -74,7 +75,8 @@ class PadlockDataGenerator:
             data = VaultPadlockEvents(
                 id=self.device_id,
                 event="access_attempt",
-                result="fail"
+                result="fail",
+                timestamp=self.timestamp
             )
         except ValidationError as e:
             print("Validation Error:", e)

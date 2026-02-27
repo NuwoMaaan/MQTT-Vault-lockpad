@@ -19,8 +19,10 @@ class VaultPadlockEvents(BaseModel):
     id: str
     event: str
     result: str
+    timestamp: datetime
 
 class ControlComputerLock(BaseModel):
     id: str
     lock_state: str
     reason: str
+    timestamp: datetime

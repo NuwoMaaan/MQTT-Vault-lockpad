@@ -19,4 +19,5 @@ class VaultPadlockEvents(BaseModel):
     id: str
     event: str
     result: str
+    timestamp: datetime
 
