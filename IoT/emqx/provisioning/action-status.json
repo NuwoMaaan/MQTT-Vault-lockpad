@@ -8,7 +8,7 @@
       "clientid": "${clientid}",
       "topic": "${topic}",
       "qos": "${qos}",
-      "device_id": "${payload.id}",
+      "id": "${payload.id}",
       "state": "${payload.state}",
       "last_unlock": "${payload.last_unlock}",
       "battery": "${payload.battery}",

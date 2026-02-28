@@ -14,36 +14,16 @@ Defined topics in this project follow the structure as: `vault/padlock/{endpoint
 
 ### System Components
 
-#### 1. **VaultPadlock** (`app/VaultPadlock.py`)
-A simulation of IoT device sending data using MQTT protocol
-
-**Responsibilities:**
-- Generates arbitrary data to send to control device.
-- Detects lockout triggers and enters **INDEFINITE_LOCKED** state when too many failed login attempts are detected
-- Displays sending and recieving MQTT messages
-
-**Key Topics:**
-- **Publishes to:** `status`, `metrics`, `event`
-- **Subscribes to:** `vault/padlock/{device_id}`
-
-#### 2. **ControlComputer** (`app/ControlComputer.py`)
-The central control system that monitors padlock health and enforces security policies.
-
-**Responsibilities:**
-- Monitors access attempts by analysing event data
-- When attempts exceed threshold (>3), publishes a lockout signal to trigger the indefinite lock mechanism
-- Displays all received messages and sent commands
-
-**Key Topics:**
-- **Publishes to:** `control`, `device_id`
-- **Subscribes to:** `status`, `metrics`, `event`
-
-#### 3. **MonitorApp** (`app/MonitorApp.py`)
-An interactive monitoring for observing system communication.
-
-**Responsibilities:**
-- Allows manual monitoring of any MQTT topic in real-time
-- Supports both send and receive modes
+#### 1. **MQTT & EMQX** 
+The project has simulation of IoT device sending data using MQTT protocol using EMQX as the broker. EMQX dashboard can be accessed and has been pre-configured to establish client connections and connect the the MongoDB.
+#### 2. **MongoDB** 
+long-term storage and ease of use for development because it is non-relational database. MongoDB has a connector type avaliable for EMQX dashboard.
+#### 3. **FastAPI** 
+Python backend framework to enable integration of Grafana (Infinity) to retrieve logs from MongoDB (MongoDB datasource is limited to Grafana Enterprise version).
+#### 4. **Grafana**
+Dashboard & data visualization tool use to showcase business/domain data) which EMQX dashboard does not collect (e.g. cpu_temp)
+#### 5. **Docker**
+To enable easy & consistent deployments across various platforms.
 
 ---
 
@@ -56,7 +36,7 @@ An interactive monitoring for observing system communication.
 
 ---
 
-### Data Flow
+### Data Flow (MQTT)
 
 ```
 VaultPadlock                       ControlComputer
@@ -75,7 +55,8 @@ VaultPadlock                       ControlComputer
 ### Deployment Steps
 0. **Preliminary:**
    ```
-   Ensure Docker engine is running and python dependencies & requirements are installed (requirements.txt)
+   Ensure Docker engine is running
+   Ensure python dependencies are installed: (execute `uv sync` in both MQTT Lockpad\backend, MQTT Lockpad\IoT)
    ```
 1. **Docker compose deployment:**
    ```
@@ -83,16 +64,16 @@ VaultPadlock                       ControlComputer
    ```
 2. **Init automation (Ensure EMQX container is healthy):**
    ```
-   python -m emqx.init
+   uv run -m emqx.init
 
    (Note: This script does not need to be run again unless rebuilding containers or you have deleted EMQX container volumes)
    ```
 
 3. **IoT devices (execute each in new terminal):**
    ```
-   python -m app.VaultPadlock
-   python -m app.ControlComputer
-   python -m app.MonitorApp (Optional)
+   uv run -m app.VaultPadlock
+   uv run -m app.ControlComputer
+   uv run -m app.MonitorApp (Optional)
    ```
 4. **View EMQX dashboard & MongoDB:**
    ```

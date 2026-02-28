@@ -8,9 +8,10 @@
       "clientid": "${clientid}",
       "topic": "${topic}",
       "qos": "${qos}",
-      "device_id": "${payload.id}",
+      "id": "${payload.id}",
       "event": "${payload.event}",
-      "result": "${payload.result}"
+      "result": "${payload.result}",
+      "timestamp": "${payload.timestamp}"
     }
   },
   "type": "mongodb"
