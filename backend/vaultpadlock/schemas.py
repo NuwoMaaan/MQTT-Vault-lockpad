@@ -1,5 +1,11 @@
 from pydantic import BaseModel
 from datetime import datetime
+from enum import StrEnum
+
+class TopicEndpoints(StrEnum):
+    events: str = "events"
+    status: str = "status"
+    metrics: str = "metrics"
 
 class VaultPadlockMetrics(BaseModel):
     id: str

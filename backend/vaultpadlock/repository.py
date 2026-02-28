@@ -2,24 +2,15 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from vaultpadlock.schemas import VaultPadlockEvents, VaultPadlockMetrics, VaultPadlockStatus
 import datetime
+from typing import TypeVar, Type
 
 
+T = TypeVar("T", VaultPadlockStatus, VaultPadlockEvents, VaultPadlockMetrics)
 
-def fetch_logs(collection: Collection,start: datetime,end: datetime
-               ) -> list[VaultPadlockStatus] | list[VaultPadlockEvents] | list[VaultPadlockMetrics]:
+def fetch_logs(schema: Type[T], collection: Collection, start: datetime,end: datetime) -> list[T]:
     
-    logs = collection.find({"timestamp": {"$gte": start, "$lte": end}}, {"_id": False})
-    return list(logs)
-
-
-
-
-### Testing
-def all_logs(collection: Collection) -> list[VaultPadlockStatus] | list[VaultPadlockEvents] | list[VaultPadlockMetrics]:
-    
-    logs = collection.find({"_id": False})
-    return list(logs)
-
+    cursor = collection.find({"timestamp": {"$gte": start, "$lte": end}}, {"_id": False})
+    return [schema(**doc) for doc in cursor]
 
 # def fetch_metric_logs(collection, start, end):
 #     pass
