@@ -8,7 +8,7 @@
       "clientid": "${clientid}",
       "topic": "${topic}",
       "qos": "${qos}",
-      "device_id": "${payload.id}",
+      "id": "${payload.id}",
       "cpu": "${payload.cpu}",
       "temperature": "${payload.temperature}",
       "timestamp": "${payload.timestamp}"
