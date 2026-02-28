@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: Infinity
+    type: yesoreyeram-infinity-datasource
+    uid: infinity
+    access: proxy
+    url: http://backend:8000
+    editable: true
+    jsonData:
+      authenticationMethod: bearerToken
+      auth_method: bearerToken
+    secureJsonData:
+      bearerToken: TEMP_PLACEHOLDER_TOKEN 
+
+
+      
