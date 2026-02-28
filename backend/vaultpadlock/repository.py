@@ -9,7 +9,8 @@ T = TypeVar("T", VaultPadlockStatus, VaultPadlockEvents, VaultPadlockMetrics)
 
 def fetch_logs(schema: Type[T], collection: Collection, start: datetime, end: datetime) -> list[T]:
     
-    cursor = collection.find({"timestamp": {"$gte": start, "$lte": end}}, {"_id": False})
+    cursor = collection.find(
+        {"timestamp": {"$gte": start.isoformat(timespec="seconds"), "$lte": end.isoformat(timespec="seconds")}})
     return [schema(**doc) for doc in cursor]
 
 # def fetch_metric_logs(collection, start, end):

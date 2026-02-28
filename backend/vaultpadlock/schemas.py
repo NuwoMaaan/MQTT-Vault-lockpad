@@ -13,6 +13,8 @@ class VaultPadlockMetrics(BaseModel):
     temperature: str
     timestamp: datetime
 
+    model_config = {"extra": "ignore"}
+
 class VaultPadlockStatus(BaseModel):
     id: str
     state: str
@@ -21,14 +23,20 @@ class VaultPadlockStatus(BaseModel):
     error: str | None
     timestamp: datetime
 
+    model_config = {"extra": "ignore"}
+
 class VaultPadlockEvents(BaseModel):
     id: str
     event: str
     result: str
     timestamp: datetime
 
+    model_config = {"extra": "ignore"}
+
 class ControlComputerLock(BaseModel):
     id: str
     lock_state: str
     reason: str
     timestamp: datetime
+
+    model_config = {"extra": "ignore"}
