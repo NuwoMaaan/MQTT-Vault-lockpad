@@ -21,6 +21,8 @@ services:
     volumes:
       - emqx_data:/opt/emqx/data
       - emqx_log:/opt/emqx/log
+    networks:
+      - database-network
   
   mongo:
     image: mongo:7
