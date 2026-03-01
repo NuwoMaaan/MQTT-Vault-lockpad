@@ -1,4 +1,3 @@
-
 from schemas.topics import TOPICS
 
 def console_padlock_out(result_status, padlock_status_data,
