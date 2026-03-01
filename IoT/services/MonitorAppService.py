@@ -1,4 +1,3 @@
-
 import threading
 from schemas.topics import TOPICS
 from schemas.user_input import U_INPUT

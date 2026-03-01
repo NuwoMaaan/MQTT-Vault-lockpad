@@ -2,7 +2,7 @@
 
 **MQTT** (Message Queuing Telemetry Transport) is a lightweight, publish–subscribe messaging protocol used for reliable communication between devices in distributed systems. It operates through a central broker that manages message exchange between clients, allowing devices to publish data to topics and subscribe to receive updates. This design enables efficient, real-time, and scalable communication, making MQTT widely used in IoT, automation, and remote monitoring applications.
 
-**MQTT Vault Padlock** Is a project to demostrate MQTT communications and furthermore incorporate a data logging & visualization pipeline using `MongoDB` for long-lived storage, `Grafana` (Infinity) for enhanced visuals beyond EMQX dashboard and `FastAPI` backend for log retrieval from the MongoDB and then use in Grafana. `EMQX` is used as the MQTT broker as the community version `Docker` image, The setup for configurations neccessary for MQTT client connection(s) and MongoDB connector are automated in a init script using the default `.env` file.
+**MQTT Vault Padlock** Is a project to demostrate MQTT communications and furthermore incorporate a data logging & visualization pipeline using `MongoDB` for long-lived storage, `Grafana` (Infinity) for domain data visualization and `FastAPI` backend for log retrieval from the MongoDB and then use in Grafana. `EMQX` is used as the MQTT broker as the community version `Docker` image, The setup for configurations neccessary for MQTT client connection(s) and MongoDB connector are automated in a init script using the default `.env` file.
 
 MQTT communications, is demonstrated through arbitrary data generation from `(VaultPadlock)`. Data is communicated to another MQTT app simulating a control device `(ControlComputer)`, it processes received data and detects a brute force attempt on the padlock and triggers a response to indefinitely lock. The Monitor application `(MonitorApp)` allows for selectively subscribing to topics to view communications and send message to any specificied topic, this is a basic CLI version of `MQTTX`. 
 
@@ -60,10 +60,11 @@ VaultPadlock                       ControlComputer
    ```
 1. **Docker compose deployment:**
    ```
-   docker compose up 
+   docker compose up (Deploys EMQX, Backend, MongoDB, Grafana)
    ```
 2. **Init automation (Ensure EMQX container is healthy):**
    ```
+   MQTT Lockpad\IoT
    uv run -m emqx.init
 
    (Note: This script does not need to be run again unless rebuilding containers or you have deleted EMQX container volumes)
@@ -71,25 +72,40 @@ VaultPadlock                       ControlComputer
 
 3. **IoT devices (execute each in new terminal):**
    ```
+   MQTT Lockpad\IoT
    uv run -m app.VaultPadlock
    uv run -m app.ControlComputer
    uv run -m app.MonitorApp (Optional)
    ```
-4. **View EMQX dashboard & MongoDB:**
+4. **View EMQX dashboard, MongoDB, Grafana:**
    ```
-   - search url: 'http://localhost:18083'
-   - Login into EMQX dashboard with default credentials (username: 'admin', password: 'password')
+   - default credentials for all logins (username: 'admin', password: 'password')
+   
+   - EMQX Dashboard: 'http://localhost:18083'
+   - Grafana dashboard: 'http://localhost:3000'
    - MongoDB connection string: mongodb://admin:password@localhost:27017/VaultPadlock?authSource=admin
    ```
+   (Note: Grafana's provisioning does not have a detailed dashboard but still showcases the ability to retrieve logs, creating and saving a dashboard will persist through the container's volume)
 ---
 
 ### Project Structure
-
-- `app/` — Main application modules (VaultPadlock, ControlComputer, MonitorApp)
-- `connections/` — MQTT broker connection configuration
-- `data/` — data generators for padlock and control messages
-- `emqx`/  — Provisioning configurations & init automation
-- `lock`/  — Indefinite lock detection & enforcement logic
-- `schemas/` — Pydantic models for data validation 
-- `services/` — Monitor app logic for interface interaction 
-- `utils/` — Helper modules (console output, lockout detection, signal handling)
+```
+MQTT Lockpad/
+├── IoT/               # Main MQTT simulation devices & EMQX broker init
+│   ├── app/           # Main application modules (VaultPadlock, ControlComputer, MonitorApp)
+│   ├── connections/   # MQTT broker connection configuration
+│   ├── data/          # Data generators for padlock and control messages
+│   ├── emqx/          # Provisioning configurations & init automation
+│   ├── lock/          # Indefinite lock detection & enforcement logic
+│   ├── schemas/       # Pydantic models for data validation
+│   ├── services/      # Monitor app logic for interface interaction
+│   └── utils/         # Helper modules (console output, lockout detection, signal handling)
+│
+├── backend/           # FastAPI backend
+│   ├── connection/    # MongoDB Connection
+│   └── vaultpadlock/  # Routes, schema & repository for vault padlock
+│
+└── grafana/           # Store provisioning config & JSON files
+    ├── dashboards/    # Dashboard structure and settings
+    └── provisioning/  # Config YAML files for datasources & dashboards
+```
