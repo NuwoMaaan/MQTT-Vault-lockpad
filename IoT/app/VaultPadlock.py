@@ -1,5 +1,5 @@
 from paho.mqtt import client as mqtt_client
-from schemas.topics import TOPICS
+from schemas.constants import TOPICS
 from utils.signal_utils import shutdown_flag
 from data.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, ascii_art
@@ -11,16 +11,17 @@ from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 class MQTTPadlockApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
-        self.data = PadlockDataGenerator(device_id=self.id)
+        self.data = PadlockDataGenerator()
+        self.host_topic = f"vault/padlock/{self.id}"
 
 
     def publish(self, client: mqtt_client):
         try:
             while not shutdown_flag.is_set():
                 # Generate padlock data
-                padlock_status_data = self.data.generate_padlock_status_data()
-                padlock_metric_data = self.data.generate_padlock_metric_data()
-                padlock_event_data = self.data.generate_padlock_event_data()
+                padlock_status_data = self.data.generate_padlock_status_data(self.id)
+                padlock_metric_data = self.data.generate_padlock_metric_data(self.id)
+                padlock_event_data = self.data.generate_padlock_event_data(self.id)
 
                 result_status = client.publish(TOPICS.status, padlock_status_data)
                 result_metric = client.publish(TOPICS.metrics, padlock_metric_data)
@@ -36,11 +37,11 @@ class MQTTPadlockApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"Received `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
-            if detect_lock_mechanism(msg):
+            if detect_lock_mechanism(msg, self.host_topic):
                 lock_mechanism(self.data)
                 
         client.subscribe(TOPICS.control)
-        client.subscribe(f"vault/padlock/{self.id}")
+        client.subscribe(self.host_topic)
         client.on_message = on_message
 
 def main():

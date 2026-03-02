@@ -1,5 +1,5 @@
 
-from schemas.controlcomputer import ControlComputerLock
+from schemas.models import ControlComputerLock
 from pydantic import ValidationError
 
 from datetime import datetime

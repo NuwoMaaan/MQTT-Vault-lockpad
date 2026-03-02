@@ -1,8 +1,7 @@
 from paho.mqtt import client as mqtt_client
 from app.MqttApp import MQTTApp
 from utils.signal_utils import shutdown_flag
-from schemas.user_input import U_INPUT
-from schemas.modes import MODE
+from schemas.constants import MODE, U_INPUT
 from services.MonitorAppService import MonitorService
 from utils.console import handleheader, ascii_art
 
