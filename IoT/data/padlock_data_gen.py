@@ -1,15 +1,15 @@
 import random
 import psutil
 import time
-from datetime import datetime
-from schemas.vaultpadlock import VaultPadlockMetrics, VaultPadlockStatus, VaultPadlockEvents
+from datetime import datetime, timezone
+from schemas.models import VaultPadlockMetrics, VaultPadlockStatus, VaultPadlockEvents
 from pydantic import ValidationError
 
 
 class PadlockDataGenerator:
-    def __init__(self, device_id):
+    def __init__(self):
         # common attributes
-        self.device_id = device_id
+        self.device_id = ""
         self.timestamp = None
         # specific to metrics
         self.unlock_attempts = 1
@@ -23,13 +23,13 @@ class PadlockDataGenerator:
 
     
 
-    def generate_padlock_status_data(self) -> VaultPadlockStatus:
+    def generate_padlock_status_data(self, device_id) -> VaultPadlockStatus:
         time.sleep(5)                                         
          
-        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         try:
             data = VaultPadlockStatus(
-                id=self.device_id,
+                id=device_id,
                 state=self.state,
                 last_unlock=self.last_unlock,
                 battery=self.battery,
@@ -43,16 +43,16 @@ class PadlockDataGenerator:
         return data.model_dump_json()
 
 
-    def generate_padlock_metric_data(self) -> VaultPadlockMetrics:
+    def generate_padlock_metric_data(self, device_id) -> VaultPadlockMetrics:
         time.sleep(5)
-        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         cpu = psutil.cpu_percent(interval=None)
         self.cpu_formatted = f"{cpu:.2f}%"
         self.temperature = f"{random.randint(30, 40)} C"
 
         try:
             data = VaultPadlockMetrics(
-                id=self.device_id,
+                id=device_id,
                 cpu=self.cpu_formatted,
                 temperature=self.temperature,
                 timestamp=self.timestamp,
@@ -63,9 +63,9 @@ class PadlockDataGenerator:
         
         return data.model_dump_json()
 
-    def generate_padlock_event_data(self) -> VaultPadlockEvents:
+    def generate_padlock_event_data(self, device_id) -> VaultPadlockEvents:
         time.sleep(5)
-        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         if self.unlock_attempts == 3: 
             self.unlock_attempts = 1
         else:
@@ -73,7 +73,7 @@ class PadlockDataGenerator:
 
         try:
             data = VaultPadlockEvents(
-                id=self.device_id,
+                id=device_id,
                 event="access_attempt",
                 result="fail",
                 timestamp=self.timestamp

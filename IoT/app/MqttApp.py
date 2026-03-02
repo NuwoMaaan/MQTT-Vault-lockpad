@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 import threading
 from connection.connect import connect_mqtt

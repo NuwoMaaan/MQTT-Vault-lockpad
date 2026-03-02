@@ -1,8 +1,8 @@
 
-from schemas.controlcomputer import ControlComputerLock
+from schemas.models import ControlComputerLock
 from pydantic import ValidationError
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 class ControlDataGenerator:
     def __init__(self):
@@ -10,7 +10,7 @@ class ControlDataGenerator:
     
     def generate_lock_data(self, device_id): 
         try:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
             data = ControlComputerLock(
                 id=device_id,
                 lock_state="INDEFINITE_LOCK",

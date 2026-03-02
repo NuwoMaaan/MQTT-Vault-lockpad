@@ -1,5 +1,8 @@
-from pydantic import BaseModel
 from datetime import datetime
+from pydantic import BaseModel
+
+from schemas.padlock_enums import LockState, PadlockEvent, EventResult
+
 
 class VaultPadlockMetrics(BaseModel):
     id: str
@@ -7,17 +10,27 @@ class VaultPadlockMetrics(BaseModel):
     temperature: str
     timestamp: datetime
 
+
 class VaultPadlockStatus(BaseModel):
     id: str
-    state: str
+    state: LockState
     last_unlock: str | None
     battery: str
     error: str | None
     timestamp: datetime
 
+
 class VaultPadlockEvents(BaseModel):
     id: str
-    event: str
-    result: str
+    event: PadlockEvent
+    result: EventResult
     timestamp: datetime
 
+
+class ControlComputerLock(BaseModel):
+    id: str
+    lock_state: LockState
+    reason: str
+    timestamp: datetime
+
+    

@@ -1,7 +1,6 @@
 import threading
-from schemas.topics import TOPICS
-from schemas.user_input import U_INPUT
-from schemas.modes import MODE
+from schemas.constants import TOPICS, U_INPUT, MODE
+
 
 class MonitorService:
     @staticmethod

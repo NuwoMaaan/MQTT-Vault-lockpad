@@ -1,4 +1,4 @@
-from schemas.topics import TOPICS
+from schemas.constants import TOPICS
 
 def console_padlock_out(result_status, padlock_status_data,
                         result_metric, padlock_metric_data,
