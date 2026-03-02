@@ -33,7 +33,7 @@ def get_status_logs(
 
 
 @router.get("/events", response_model=List[VaultPadlockEvents])
-def get_status_logs(
+def get_event_logs(
     start: datetime = Query(..., description="Start time (ISO format)"),
     end: datetime = Query(..., description="End time (ISO format)")
 ):

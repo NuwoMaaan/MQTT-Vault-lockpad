@@ -1,7 +1,7 @@
 import random
 import psutil
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from schemas.models import VaultPadlockMetrics, VaultPadlockStatus, VaultPadlockEvents
 from pydantic import ValidationError
 
@@ -26,7 +26,7 @@ class PadlockDataGenerator:
     def generate_padlock_status_data(self, device_id) -> VaultPadlockStatus:
         time.sleep(5)                                         
          
-        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         try:
             data = VaultPadlockStatus(
                 id=device_id,
@@ -45,7 +45,7 @@ class PadlockDataGenerator:
 
     def generate_padlock_metric_data(self, device_id) -> VaultPadlockMetrics:
         time.sleep(5)
-        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         cpu = psutil.cpu_percent(interval=None)
         self.cpu_formatted = f"{cpu:.2f}%"
         self.temperature = f"{random.randint(30, 40)} C"
@@ -65,7 +65,7 @@ class PadlockDataGenerator:
 
     def generate_padlock_event_data(self, device_id) -> VaultPadlockEvents:
         time.sleep(5)
-        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         if self.unlock_attempts == 3: 
             self.unlock_attempts = 1
         else:
