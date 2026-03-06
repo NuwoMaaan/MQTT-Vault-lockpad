@@ -1,5 +1,4 @@
 import requests
-import json
 from auth.config import settings
 from auth.security.token_service import issue_service_token
 

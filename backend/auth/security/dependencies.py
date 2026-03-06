@@ -5,7 +5,7 @@ from auth.security.jwt_handler import verify_token
 security = HTTPBearer()
 
 def require_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    
     token = credentials.credentials
     payload = verify_token(token)
+    
     return payload

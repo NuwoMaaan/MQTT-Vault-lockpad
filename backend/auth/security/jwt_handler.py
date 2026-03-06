@@ -4,13 +4,15 @@ from datetime import datetime, UTC, timedelta
 import jwt
 
 SECRET_KEY = settings.JWT_SECRET_KEY
-EXPIRE = 60
+EXPIRE = settings.EXPIRE
 ALGORITHM = settings.ALGORITHM
 
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(UTC) + timedelta(minutes=EXPIRE)
+    
+    # Long-lived token (service account)
+    expire = datetime.now(UTC) + timedelta(days=EXPIRE)
     to_encode.update({"exp": expire})
 
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
