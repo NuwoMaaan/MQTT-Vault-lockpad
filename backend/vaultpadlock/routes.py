@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from connection.database import get_db_conn
 from vaultpadlock.schemas import VaultPadlockEvents, VaultPadlockMetrics, VaultPadlockStatus, TopicEndpoints
 from vaultpadlock.repository import fetch_logs
+from auth.security.dependencies import require_token
 
 from datetime import datetime
 from typing import List
@@ -10,7 +11,7 @@ from typing import List
 router = APIRouter()
 
 
-@router.get("/metrics", response_model=List[VaultPadlockMetrics])
+@router.get("/metrics", dependencies=[Depends(require_token)], response_model=List[VaultPadlockMetrics])
 def get_metrics_logs(
     start: datetime = Query(..., description="Start time (ISO format)"),
     end: datetime = Query(..., description="End time (ISO format)")
@@ -21,7 +22,7 @@ def get_metrics_logs(
     return fetch_logs(VaultPadlockMetrics, collection, start, end)
 
 
-@router.get("/status", response_model=List[VaultPadlockStatus])
+@router.get("/status", dependencies=[Depends(require_token)], response_model=List[VaultPadlockStatus])
 def get_status_logs(
     start: datetime = Query(..., description="Start time (ISO format)"),
     end: datetime = Query(..., description="End time (ISO format)")
@@ -32,7 +33,7 @@ def get_status_logs(
     return fetch_logs(VaultPadlockStatus, collection, start, end)
 
 
-@router.get("/events", response_model=List[VaultPadlockEvents])
+@router.get("/events", dependencies=[Depends(require_token)], response_model=List[VaultPadlockEvents])
 def get_event_logs(
     start: datetime = Query(..., description="Start time (ISO format)"),
     end: datetime = Query(..., description="End time (ISO format)")
