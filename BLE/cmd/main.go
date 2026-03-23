@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
-	"github.com/MQTT-Vault-lockpad/BLE/internal"
+	"github.com/NuwoMaaan/MQTT-Vault-lockpad/BLE/internal"
 	"tinygo.org/x/bluetooth"
 )
 
@@ -12,7 +14,6 @@ var adapter = bluetooth.DefaultAdapter
 func main() {
 	must("enable BLE stack", adapter.Enable())
 
-	println("scanning...")
 	err := adapter.Scan(func(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 		if device.LocalName() != "My BLE Tester" {
 			return
@@ -20,7 +21,7 @@ func main() {
 
 		token, err := internal.TokenGenerate()
 		if err != nil {
-			fmt.Println("token generation failed:", err)
+			fmt.Fprintln(os.Stderr, "token generation failed:", err)
 			return
 		}
 
@@ -30,12 +31,10 @@ func main() {
 			token,
 		)
 
-		fmt.Println("found target device:")
-		fmt.Println("uuid/address:", ble.UUID)
-		fmt.Println("local name:", ble.LocalName)
-		fmt.Println("token:", ble.Token)
+		json.NewEncoder(os.Stdout).Encode(ble)
 
 		must("stop scan", adapter.StopScan())
+
 	})
 
 	must("start scan", err)

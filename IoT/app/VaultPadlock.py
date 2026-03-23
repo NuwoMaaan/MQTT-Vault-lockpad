@@ -1,11 +1,14 @@
 from paho.mqtt import client as mqtt_client
-from sys import stdin
 from schemas.constants import TOPICS
 from utils.signal_utils import shutdown_flag
 from data.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, ascii_art
 from app.MqttApp import MQTTApp
 from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
+
+import sys
+import subprocess
+import json
 
 
 
@@ -45,18 +48,30 @@ class MQTTPadlockApp(MQTTApp):
         client.subscribe(self.host_topic)
         client.on_message = on_message
     
-    def initialize_ble():
-        print("- Preliminary action: 'BLE authentication method'")
+    def initialize_ble(self) -> dict[str, str]:
+        print("- Preliminary action: 'BLE authentication register'")
         print("Activate MyBLE Simulator peripheral mode")
-        data = None
-        while not data:
-            data = stdin.read()
+        result = subprocess.run(
+            ["go", "run", "./main.go"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd="/Users/leoholden/Documents/GitHub/MQTT-Vault-lockpad/BLE/cmd"
+        )
+
+        data = json.loads(result.stdout)
+        if data:
+            print("Succesful registration")
+            print(data)
+            return data
+
             
 
 
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
     ascii_art()
+    ble_data = app.initialize_ble()
     app.run()
 
 if __name__ == '__main__':
