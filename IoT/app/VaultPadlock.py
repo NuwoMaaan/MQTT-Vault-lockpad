@@ -1,4 +1,5 @@
 from paho.mqtt import client as mqtt_client
+from sys import stdin
 from schemas.constants import TOPICS
 from utils.signal_utils import shutdown_flag
 from data.padlock_data_gen import PadlockDataGenerator
@@ -43,6 +44,15 @@ class MQTTPadlockApp(MQTTApp):
         client.subscribe(TOPICS.control)
         client.subscribe(self.host_topic)
         client.on_message = on_message
+    
+    def initialize_ble():
+        print("- Preliminary action: 'BLE authentication method'")
+        print("Activate MyBLE Simulator peripheral mode")
+        data = None
+        while not data:
+            data = stdin.read()
+            
+
 
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
