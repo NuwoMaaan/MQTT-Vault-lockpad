@@ -6,8 +6,8 @@ from connection.config import settings
 
 BASE_DIR = Path(__file__).parent
 BASE_URL = settings.EMQX_URL
-USER = settings.USER
-PASS = settings.PASS
+USER = settings.ADMIN_USER
+PASS = settings.ADMIN_PASS
 
 session = requests.Session()
 
