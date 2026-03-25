@@ -22,7 +22,7 @@ type Discovery struct {
 }
 
 func Discover(conn *bluetooth.Device) (*Discovery, error) {
-	fmt.Println("Attempting to discover services...")
+	// fmt.Println("Attempting to discover services...")
 	serviceUUID := bluetooth.NewUUID([16]byte{
 		0x0D, 0x55, 0x49, 0xA6,
 		0xDD, 0xAF,

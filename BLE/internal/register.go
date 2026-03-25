@@ -3,13 +3,15 @@ package internal
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"tinygo.org/x/bluetooth"
 )
 
 type BLEData struct {
-	deviceUUID string
+	DeviceUUID string
 	LocalName  string
 	Token      string
 }
@@ -22,7 +24,6 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		if device.LocalName() != "padlockAuth" {
 			return
 		}
-
 		_ = adapter.StopScan()
 		found <- device
 	})
@@ -37,7 +38,7 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		return nil, err
 	}
 
-	err = ConnectToPeripheral(adapter, device, token)
+	err = ConnectToPeripheral(adapter, device, token, "write")
 	if err != nil {
 		return nil, err
 	}
@@ -47,14 +48,14 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		device.LocalName(),
 		token,
 	)
-	// fmt.Println(device.Address.String())
+	json.NewEncoder(os.Stdout).Encode(ble)
 
 	return ble, nil
 }
 
 func newBLEData(uuid string, localName string, token string) *BLEData {
 	return &BLEData{
-		deviceUUID: uuid,
+		DeviceUUID: uuid,
 		LocalName:  localName,
 		Token:      token,
 	}

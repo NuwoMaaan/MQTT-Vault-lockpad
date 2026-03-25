@@ -22,18 +22,18 @@ func main() {
 
 	switch os.Args[1] {
 	case "detect":
-		_, err := internal.Register(adapter)
+		ble, err := internal.Register(adapter)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		// if err := internal.ListenAndDetect(adapter, ble); err != nil {
-		// 	fmt.Fprintln(os.Stderr, err)
-		// 	os.Exit(1)
-		// }
+		if err := internal.ListenAndDetect(adapter, ble); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 
-		// select {} // keep process alive
+		select {} // keep process alive
 
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")
