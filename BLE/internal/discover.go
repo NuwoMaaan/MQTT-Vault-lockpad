@@ -43,10 +43,16 @@ func Discover(conn *bluetooth.Device) (*Discovery, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Discovery serviceUUID error: %w", err)
 	}
+	if len(services) == 0 {
+		return nil, fmt.Errorf("service not found: %s", serviceUUID.String())
+	}
 
 	characteristics, err := services[0].DiscoverCharacteristics([]bluetooth.UUID{charUUID})
 	if err != nil {
 		return nil, fmt.Errorf("Discovery charactisticUUID error: %w", err)
+	}
+	if len(characteristics) == 0 {
+		return nil, fmt.Errorf("characteristic not found: %s", charUUID.String())
 	}
 
 	// Right now discovery is limited to one device

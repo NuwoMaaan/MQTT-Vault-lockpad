@@ -15,8 +15,8 @@ type PresenceEvent struct {
 }
 
 const (
-	presenceTimeout = 1500 * time.Millisecond
-	checkInterval   = 200 * time.Millisecond
+	presenceTimeout = 4 * time.Second
+	checkInterval   = 500 * time.Millisecond
 	scanLoopDelay   = 300 * time.Millisecond
 )
 
