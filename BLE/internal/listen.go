@@ -17,7 +17,7 @@ type PresenceEvent struct {
 
 func ListenAndDetect(adapter *bluetooth.Adapter, ble *BLEData) error {
 	lastSeen := time.Now().Add(-10 * time.Second)
-	go monitorPresence(ble.UUID, &lastSeen, ble.Token)
+	go monitorPresence(ble.deviceUUID, &lastSeen, ble.Token)
 
 	err := adapter.Scan(func(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 		if device.LocalName() != ble.LocalName {

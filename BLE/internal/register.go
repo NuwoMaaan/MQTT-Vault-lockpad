@@ -9,9 +9,9 @@ import (
 )
 
 type BLEData struct {
-	UUID      string
-	LocalName string
-	Token     string
+	deviceUUID string
+	LocalName  string
+	Token      string
 }
 
 func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
@@ -37,7 +37,7 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		return nil, err
 	}
 
-	err = ConnectAndWriteToken(adapter, device, token)
+	err = ConnectToPeripheral(adapter, device, token)
 	if err != nil {
 		return nil, err
 	}
@@ -47,15 +47,16 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		device.LocalName(),
 		token,
 	)
+	// fmt.Println(device.Address.String())
 
 	return ble, nil
 }
 
 func newBLEData(uuid string, localName string, token string) *BLEData {
 	return &BLEData{
-		UUID:      uuid,
-		LocalName: localName,
-		Token:     token,
+		deviceUUID: uuid,
+		LocalName:  localName,
+		Token:      token,
 	}
 }
 

@@ -16,7 +16,12 @@ import (
 // 	return err
 // }
 
-func Discover(conn bluetooth.Device, token string) error {
+type Discovery struct {
+	deviceService bluetooth.DeviceService
+	deviceChar    bluetooth.DeviceCharacteristic
+}
+
+func Discover(conn *bluetooth.Device) (*Discovery, error) {
 	fmt.Println("Attempting to discover services...")
 	serviceUUID := bluetooth.NewUUID([16]byte{
 		0x0D, 0x55, 0x49, 0xA6,
@@ -36,17 +41,19 @@ func Discover(conn bluetooth.Device, token string) error {
 
 	services, err := conn.DiscoverServices([]bluetooth.UUID{serviceUUID})
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("Discovery serviceUUID error: %w", err)
 	}
 
-	for i, service := range services {
-		fmt.Println(i, "service uuid:", service.UUID())
-		characteristics, err := service.DiscoverCharacteristics([]bluetooth.UUID{charUUID})
-		if err != nil {
-			return err
-		}
-		fmt.Println(characteristics)
+	characteristics, err := services[0].DiscoverCharacteristics([]bluetooth.UUID{charUUID})
+	if err != nil {
+		return nil, fmt.Errorf("Discovery charactisticUUID error: %w", err)
 	}
 
-	return nil
+	// Right now discovery is limited to one device
+	discovery := &Discovery{
+		deviceService: services[0],
+		deviceChar:    characteristics[0],
+	}
+
+	return discovery, nil
 }
