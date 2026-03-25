@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -12,36 +11,32 @@ import (
 var adapter = bluetooth.DefaultAdapter
 
 func main() {
-	must("enable BLE stack", adapter.Enable())
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "usage: main.go detect")
+		os.Exit(1)
+	}
 
-	err := adapter.Scan(func(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
-		if device.LocalName() != "My BLE Tester" {
-			return
-		}
+	if err := adapter.Enable(); err != nil {
+		fmt.Fprintln(os.Stderr, "adapter enable error:", err)
+	}
 
-		token, err := internal.TokenGenerate()
+	switch os.Args[1] {
+	case "detect":
+		_, err := internal.Register(adapter)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "token generation failed:", err)
-			return
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 
-		ble := internal.NewBLEData(
-			device.Address.String(),
-			device.LocalName(),
-			token,
-		)
+		// if err := internal.ListenAndDetect(adapter, ble); err != nil {
+		// 	fmt.Fprintln(os.Stderr, err)
+		// 	os.Exit(1)
+		// }
 
-		json.NewEncoder(os.Stdout).Encode(ble)
+		// select {} // keep process alive
 
-		must("stop scan", adapter.StopScan())
-
-	})
-
-	must("start scan", err)
-}
-
-func must(action string, err error) {
-	if err != nil {
-		panic("failed to " + action + ": " + err.Error())
+	default:
+		fmt.Fprintln(os.Stderr, "unknown mode")
+		os.Exit(1)
 	}
 }
