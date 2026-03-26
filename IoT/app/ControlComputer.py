@@ -1,6 +1,5 @@
 from paho.mqtt import client as mqtt_client
 from data.control_data_gen import ControlDataGenerator
-from utils.console import ascii_art
 from schemas.constants import TOPICS
 from utils.signal_utils import shutdown_flag
 from lock.lockout import publish_lockout, detection_login_attempts
@@ -37,7 +36,6 @@ class MQTTControlComputerApp(MQTTApp):
 
 def main():
     app = MQTTControlComputerApp(id="control_device_01")
-    ascii_art()
     app.run(ble_proc=None)
     
 

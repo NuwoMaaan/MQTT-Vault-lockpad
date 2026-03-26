@@ -1,7 +1,7 @@
 from paho.mqtt import client as mqtt_client
 from schemas.constants import TOPICS
 from utils.signal_utils import shutdown_flag
-from utils.console import console_padlock_out, ascii_art
+from utils.console import console_padlock_out
 from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 from services.VaultPadlockService import VaultPadlockService
 from data.padlock_data_gen import PadlockDataGenerator
@@ -9,9 +9,11 @@ from app.MqttApp import MQTTApp
 from app.ble_device import BLEDevice
 
 
+
 class MQTTPadlockApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
+        self.passcode = '000'
         self.data = PadlockDataGenerator()
         self.ble_device = BLEDevice()
         self.ble_present = False
@@ -26,8 +28,6 @@ class MQTTPadlockApp(MQTTApp):
                 padlock_status_data = self.data.generate_padlock_status_data(self.id)
                 padlock_metric_data = self.data.generate_padlock_metric_data(self.id)
                 # padlock_event_data = self.data.generate_padlock_event_data(self.id)
-
-                # padlock_event_data = VaultPadlockService.access_attempt(self)
 
                 result_status = client.publish(TOPICS.status, padlock_status_data)
                 result_metric = client.publish(TOPICS.metrics, padlock_metric_data)
@@ -50,12 +50,16 @@ class MQTTPadlockApp(MQTTApp):
         client.subscribe(TOPICS.control)
         client.subscribe(self.host_topic)
         client.on_message = on_message
-            
 
+    def access_attempt(self):
+        padlock_event_data = VaultPadlockService.access_attempt(self)
+        return padlock_event_data
+
+            
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
-    ascii_art()
-    VaultPadlockService.detect_BLE_device(app)
+    VaultPadlockService.BLE(app)
+    VaultPadlockService.cli_access(app)
     app.run(app.ble_proc)
 
 if __name__ == '__main__':
