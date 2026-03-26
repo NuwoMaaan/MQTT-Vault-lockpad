@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 import threading
 import subprocess
@@ -6,6 +8,7 @@ import json
 
 if TYPE_CHECKING:
     from app.VaultPadlock import MQTTPadlockApp
+    from app.ble_device import BLEDevice
 
 
 class VaultPadlockService():
@@ -22,9 +25,9 @@ class VaultPadlockService():
             text=True,
             bufsize=1,
         )
-        def stdout_reader() -> None: 
-            assert app.ble_proc.stdout is not None
-            for line in app.ble_proc.stdout:
+        def stdout_reader(ble_proc: subprocess.Popen, ble_device: BLEDevice) -> None: 
+            assert ble_proc.stdout is not None
+            for line in ble_proc.stdout:
                 line = line.strip()
                 if not line:
                     continue
@@ -38,21 +41,21 @@ class VaultPadlockService():
                         app.ble_present = bool(event["Present"])
                         print(event)
                 if "LocalName" in event:
-                        app.ble_device.local_name = event.get('LocalName')
-                        app.ble_device.token = event.get('Token')
-                        app.ble_device.UUID = event.get('DeviceUUID')
-                        print(app.ble_device)
+                        ble_device.local_name = event.get('LocalName')
+                        ble_device.token = event.get('Token')
+                        ble_device.UUID = event.get('DeviceUUID')
+                        print(ble_device)
         
 
-        def stderr_reader() -> None:
-            assert app.ble_proc.stderr is not None
-            for line in app.ble_proc.stderr:
+        def stderr_reader(ble_proc: subprocess.Popen) -> None:
+            assert ble_proc.stderr is not None
+            for line in ble_proc.stderr:
                 line = line.strip()
                 if line:
                     print("BLE stderr:", line)
 
-        threading.Thread(target=stdout_reader, daemon=True).start()
-        threading.Thread(target=stderr_reader, daemon=True).start()
+        threading.Thread(target=stdout_reader, args=(app.ble_proc, app.ble_device), daemon=True).start()
+        threading.Thread(target=stderr_reader, args=(app.ble_proc,), daemon=True).start()
 
 
     @staticmethod

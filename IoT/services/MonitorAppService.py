@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 import threading
 from schemas.constants import TOPICS, U_INPUT, MODE

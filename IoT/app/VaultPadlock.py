@@ -27,11 +27,11 @@ class MQTTPadlockApp(MQTTApp):
                 padlock_metric_data = self.data.generate_padlock_metric_data(self.id)
                 # padlock_event_data = self.data.generate_padlock_event_data(self.id)
 
-                padlock_event_data = VaultPadlockService.access_attempt(self)
-                
+                # padlock_event_data = VaultPadlockService.access_attempt(self)
+
                 result_status = client.publish(TOPICS.status, padlock_status_data)
                 result_metric = client.publish(TOPICS.metrics, padlock_metric_data)
-                result_event = client.publish(TOPICS.event, padlock_event_data)
+                # result_event = client.publish(TOPICS.event, padlock_event_data)
 
                 # console_padlock_out(result_status, padlock_status_data,
                 #                     result_metric,  padlock_metric_data,
