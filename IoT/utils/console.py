@@ -4,28 +4,23 @@ def console_padlock_out(result_status, padlock_status_data,
                         result_metric, padlock_metric_data,
                         result_event, padlock_event_data
                         ):
-    publish_status_status = result_status[0]
-    publish_metrics_status = result_metric[0]
-    publish_events_status = result_event[0]
 
-    if publish_status_status == 0:
+    if result_status[0] == 0:
         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_status_data}, topic: {TOPICS.status}\n\r")
     else:
         print(f"Failed to send message to topic: {TOPICS.status}")
-    if publish_metrics_status == 0:
+    if result_metric[0] == 0:
         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_metric_data}, topic: {TOPICS.metrics}\n\r")
     else:
         print(f"Failed to send message to topic: {TOPICS.metrics}")
-    if publish_events_status == 0:
+    if result_event[0] == 0:
         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_event_data}, topic: {TOPICS.event}\n\r")
     else:
         print(f"Failed to send message to topic: {TOPICS.event}")
 
 
 def console_control_out(result_control, control_data):
-    publish_control_status = result_control[0]
-
-    if publish_control_status == 0:
+    if result_control[0] == 0:
         print(f"Sent: CONTROL_SYS->PADLOCK: {control_data}, topic: {TOPICS.control}\n\r")
     else:
         print(f"Failed to send message to topic {TOPICS.control}")

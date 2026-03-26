@@ -1,10 +1,14 @@
+from typing import TYPE_CHECKING
 import threading
 from schemas.constants import TOPICS, U_INPUT, MODE
+if TYPE_CHECKING:
+    from app.MonitorApp import MonitorApp
+
 
 
 class MonitorService:
     @staticmethod
-    def publish_mode(app):
+    def publish_mode(app: MonitorApp):
         app.current_mode = MODE.publish
         print("Switched to publish mode.")
         for key in TOPICS:
@@ -23,7 +27,7 @@ class MonitorService:
             app.current_mode = None
 
     @staticmethod
-    def subscribe_mode(app):
+    def subscribe_mode(app: MonitorApp):
         app.current_mode = MODE.subscribe
         print("Topics:")
         for key in TOPICS:
@@ -45,7 +49,7 @@ class MonitorService:
             print("Invalid topic.")
     
     @staticmethod
-    def unsubscribe_mode(app):
+    def unsubscribe_mode(app: MonitorApp):
         app.current_mode = MODE.unsubscribe
         for key in TOPICS:
             print(f"- {key}")
@@ -70,7 +74,7 @@ class MonitorService:
 
 
     @staticmethod
-    def recv_mode(app):
+    def recv_mode(app: MonitorApp):
         app.current_mode = MODE.receive
         print('Receive Mode - Listening for messages on topics:')
         for topic in app.sub_list:
@@ -86,7 +90,7 @@ class MonitorService:
 
 
     @staticmethod
-    def choice(app, mode_choice):
+    def choice(app: MonitorApp, mode_choice: str):
         match mode_choice:
             case U_INPUT.publish: return MonitorService.publish_mode(app)
             case U_INPUT.receive: return MonitorService.recv_mode(app)
