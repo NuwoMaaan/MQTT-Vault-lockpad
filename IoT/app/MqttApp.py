@@ -17,15 +17,17 @@ class MQTTApp(ABC):
     def subscribe(self):
         pass
 
-    def run(self):
+    def run(self, ble_proc):
         print(f"Device_id: {self.id}")
         threading.Thread(target=self.publish, args=(self.client,)).start()
         threading.Thread(target=self.subscribe, args=(self.client,)).start()
 
         try:
-            self.client.loop_forever()
+            while not shutdown_flag.is_set():
+                self.client.loop(timeout=1.0)
         except KeyboardInterrupt:
             print("KeyboardInterrupt, shutting down...")
             shutdown_flag.set()
             self.client.loop_stop()
             self.client.disconnect()
+            ble_proc.terminate()

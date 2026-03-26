@@ -4,9 +4,11 @@ from utils.signal_utils import shutdown_flag
 from data.padlock_data_gen import PadlockDataGenerator
 from utils.console import console_padlock_out, ascii_art
 from app.MqttApp import MQTTApp
+from app.ble_device import BLEDevice
 from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
+import threading
 
-import sys
+from pathlib import Path
 import subprocess
 import json
 
@@ -16,6 +18,9 @@ class MQTTPadlockApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
         self.data = PadlockDataGenerator()
+        self.ble_device = BLEDevice()
+        self.ble_present = False
+        self.ble_proc = None
         self.host_topic = f"vault/padlock/{self.id}"
 
 
@@ -47,32 +52,48 @@ class MQTTPadlockApp(MQTTApp):
         client.subscribe(TOPICS.control)
         client.subscribe(self.host_topic)
         client.on_message = on_message
+            
     
-    def initialize_ble(self) -> dict[str, str]:
-        print("- Preliminary action: 'BLE authentication register'")
-        print("Activate MyBLE Simulator peripheral mode")
-        result = subprocess.run(
-            ["go", "run", "./main.go"],
-            capture_output=True,
+    def detect_BLE_device(self):
+        ble_cmd_dir = Path(__file__).resolve().parents[2] / "BLE" / "cmd"
+
+        self.ble_present = False
+        self.ble_proc = subprocess.Popen(
+            ["go", "run", "./main.go", "detect"],
+            cwd=ble_cmd_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            check=True,
-            cwd="/Users/leoholden/Documents/GitHub/MQTT-Vault-lockpad/BLE/cmd"
+            bufsize=1,
         )
+        def reader():
+            for line in self.ble_proc.stdout:
+                line = line.strip()
+                if not line:
+                    continue
+            
+                try:
+                    event = json.loads(line)
+                    if "Present" in event:
+                        self.ble_present = bool(event["Present"])
+                        print(event)
+                    if "LocalName" in event:
+                        self.ble_device.local_name = event.get('LocalName')
+                        self.ble_device.token = event.get('Token')
+                        self.ble_device.UUID = event.get('DeviceUUID')
+                        print(self.ble_device)
+                except json.JSONDecodeError:
+                    continue
 
-        data = json.loads(result.stdout)
-        if data:
-            print("Succesful registration")
-            print(data)
-            return data
-
+        threading.Thread(target=reader, daemon=True).start()
             
 
 
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
     ascii_art()
-    ble_data = app.initialize_ble()
-    app.run()
+    app.detect_BLE_device()
+    app.run(app.ble_proc)
 
 if __name__ == '__main__':
     main()

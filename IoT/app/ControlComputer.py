@@ -38,7 +38,7 @@ class MQTTControlComputerApp(MQTTApp):
 def main():
     app = MQTTControlComputerApp(id="control_device_01")
     ascii_art()
-    app.run()
+    app.run(ble_proc=None)
     
 
 

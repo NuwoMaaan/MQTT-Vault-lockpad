@@ -63,7 +63,7 @@ func writeToPeripheral(discovery *Discovery, token string) error {
 	if err != nil {
 		return fmt.Errorf("write token: %w", err)
 	}
-	fmt.Println("token write to charUUID:", discovery.deviceChar.UUID())
+	// fmt.Println("token write to charUUID:", discovery.deviceChar.UUID())
 	time.Sleep(300 * time.Millisecond)
 	return nil
 }

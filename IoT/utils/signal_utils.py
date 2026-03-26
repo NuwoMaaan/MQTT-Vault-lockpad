@@ -8,7 +8,7 @@ def signal_handler(sig, frame):
     """Handle shutdown signals gracefully"""
     print('\nShutdown signal received. Stopping...')
     shutdown_flag.set()
-    sys.exit(0)
+    # sys.exit(0)
 
 def setup_signal_handlers():
     """Set up signal handlers for graceful shutdown"""
