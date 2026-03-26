@@ -66,7 +66,8 @@ class MQTTPadlockApp(MQTTApp):
             text=True,
             bufsize=1,
         )
-        def reader():
+        def stdout_reader():
+            assert self.ble_proc.stdout is not None
             for line in self.ble_proc.stdout:
                 line = line.strip()
                 if not line:
@@ -84,9 +85,16 @@ class MQTTPadlockApp(MQTTApp):
                         print(self.ble_device)
                 except json.JSONDecodeError:
                     continue
+        
+        def stderr_reader():
+            assert self.ble_proc.stderr is not None
+            for line in self.ble_proc.stderr:
+                line = line.strip()
+                if line:
+                    print("BLE stderr:", line)
 
-        threading.Thread(target=reader, daemon=True).start()
-            
+        threading.Thread(target=stdout_reader, daemon=True).start()
+        threading.Thread(target=stderr_reader, daemon=True).start()
 
 
 def main():
