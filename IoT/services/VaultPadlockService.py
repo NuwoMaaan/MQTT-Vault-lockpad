@@ -8,6 +8,8 @@ import json
 import sys
 import time
 from utils.signal_utils import shutdown_flag
+from schemas.padlock_enums import PadlockEvent, EventResult
+from schemas.constants import TOPICS
 
 if TYPE_CHECKING:
     from app.VaultPadlock import MQTTPadlockApp
@@ -81,13 +83,24 @@ def _cli_access_loop(app: MQTTPadlockApp) -> None:
 
         if not app.ble_present:
             print("Access denied: BLE no longer present")
+            _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.fail)
             continue
 
         if code != app.passcode:
             print("Access denied: incorrect passcode")
+            _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.fail)
             continue
 
-        print("Access granted")
+        if code == app.passcode and app.ble_present:
+            print("Access granted")
+            _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.success)
+            continue
+
+def _access_attempt_data(app: MQTTPadlockApp, event: str, result: str):
+    event_data = app.data.generate_event_data(event=event, result=result)
+    if event_data is not None:
+        app.client.publish(TOPICS.event, event_data)
+
         
 
 

@@ -7,6 +7,7 @@ from services.VaultPadlockService import VaultPadlockService
 from data.padlock_data_gen import PadlockDataGenerator
 from app.MqttApp import MQTTApp
 from app.ble_device import BLEDevice
+import time
 
 
 
@@ -14,7 +15,7 @@ class MQTTPadlockApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
         self.passcode = '000'
-        self.data = PadlockDataGenerator()
+        self.data = PadlockDataGenerator(self.id)
         self.ble_device = BLEDevice()
         self.ble_present = False
         self.ble_proc = None
@@ -25,18 +26,14 @@ class MQTTPadlockApp(MQTTApp):
         try:
             while not shutdown_flag.is_set():
                 # Generate padlock data
-                padlock_status_data = self.data.generate_padlock_status_data(self.id)
-                padlock_metric_data = self.data.generate_padlock_metric_data(self.id)
-                # padlock_event_data = self.data.generate_padlock_event_data(self.id)
+                padlock_status_data = self.data.generate_status_data()
+                padlock_metric_data = self.data.generate_metric_data()
 
-                result_status = client.publish(TOPICS.status, padlock_status_data)
-                result_metric = client.publish(TOPICS.metrics, padlock_metric_data)
-                # result_event = client.publish(TOPICS.event, padlock_event_data)
-
-                # console_padlock_out(result_status, padlock_status_data,
-                #                     result_metric,  padlock_metric_data,
-                #                     result_event, padlock_event_data
-                # )
+                if padlock_status_data is not None:
+                    client.publish(TOPICS.status, padlock_status_data)
+                if padlock_metric_data is not None:
+                    client.publish(TOPICS.metrics, padlock_metric_data)
+                time.sleep(5)
         except KeyboardInterrupt:
             print('programmed stopped')
 
@@ -50,10 +47,6 @@ class MQTTPadlockApp(MQTTApp):
         client.subscribe(TOPICS.control)
         client.subscribe(self.host_topic)
         client.on_message = on_message
-
-    def access_attempt(self):
-        padlock_event_data = VaultPadlockService.access_attempt(self)
-        return padlock_event_data
 
             
 def main():

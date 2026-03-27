@@ -2,7 +2,6 @@ from schemas.constants import TOPICS
 
 def console_padlock_out(result_status, padlock_status_data,
                         result_metric, padlock_metric_data,
-                        result_event, padlock_event_data
                         ):
 
     if result_status[0] == 0:
@@ -13,10 +12,6 @@ def console_padlock_out(result_status, padlock_status_data,
         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_metric_data}, topic: {TOPICS.metrics}\n\r")
     else:
         print(f"Failed to send message to topic: {TOPICS.metrics}")
-    if result_event[0] == 0:
-        print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_event_data}, topic: {TOPICS.event}\n\r")
-    else:
-        print(f"Failed to send message to topic: {TOPICS.event}")
 
 
 def console_control_out(result_control, control_data):
