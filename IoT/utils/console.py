@@ -1,17 +1,17 @@
 from schemas.constants import TOPICS
 
-def console_padlock_out(result_status, padlock_status_data,
-                        result_metric, padlock_metric_data,
-                        ):
+# def console_padlock_out(result_status, padlock_status_data,
+#                         result_metric, padlock_metric_data,
+#                         ):
 
-    if result_status[0] == 0:
-        print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_status_data}, topic: {TOPICS.status}\n\r")
-    else:
-        print(f"Failed to send message to topic: {TOPICS.status}")
-    if result_metric[0] == 0:
-        print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_metric_data}, topic: {TOPICS.metrics}\n\r")
-    else:
-        print(f"Failed to send message to topic: {TOPICS.metrics}")
+#     if result_status[0] == 0:
+#         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_status_data}, topic: {TOPICS.status}\n\r")
+#     else:
+#         print(f"Failed to send message to topic: {TOPICS.status}")
+#     if result_metric[0] == 0:
+#         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_metric_data}, topic: {TOPICS.metrics}\n\r")
+#     else:
+#         print(f"Failed to send message to topic: {TOPICS.metrics}")
 
 
 def console_control_out(result_control, control_data):

@@ -14,9 +14,7 @@ class MQTTControlComputerApp(MQTTApp):
     def publish(self, client: mqtt_client): 
         try:
             while not shutdown_flag.is_set():
-                # control_data = generator.generate_control_data() # Mock keepalive
-                # result_control = client.publish(TOPICS.control, control_data)
-                # console_control_out(result_control, control_data)
+                # Simulate something like heartbeat ping
                 pass
         except KeyboardInterrupt:
             print('Program Stopped')

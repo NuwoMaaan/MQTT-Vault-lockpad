@@ -61,6 +61,7 @@ class VaultPadlockService():
         threading.Thread(target=_stdout_reader, args=(app.ble_proc, app.ble_device), daemon=True).start()
         threading.Thread(target=_stderr_reader, args=(app.ble_proc,), daemon=True).start()
 
+
     @staticmethod
     def cli_access(app: MQTTPadlockApp):
         threading.Thread(target=_cli_access_loop, args=(app,), daemon=True,).start()
@@ -108,6 +109,7 @@ def _cli_access_loop(app: MQTTPadlockApp) -> None:
             app.data.status_data.state = LockState.unlocked
             _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.success)
             continue
+
 
 def _access_attempt_data(app: MQTTPadlockApp, event: str, result: str):
     event_data = app.data.generate_event_data(event=event, result=result)

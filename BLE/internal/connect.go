@@ -10,7 +10,6 @@ import (
 )
 
 func ConnectToPeripheral(adapter *bluetooth.Adapter, device bluetooth.ScanResult, token string, flag string) error {
-	// fmt.Println("Attempting connection...")
 	conn, err := adapter.Connect(device.Address, bluetooth.ConnectionParams{})
 	if err != nil {
 		return fmt.Errorf("connect to peripheral error: %w", err)
@@ -38,19 +37,16 @@ func ConnectToPeripheral(adapter *bluetooth.Adapter, device bluetooth.ScanResult
 }
 
 func readFromPeripheral(discovery *Discovery, token string) error {
-	// fmt.Println("attempting read from perhipheral")
-	buf := make([]byte, 512) // oversized buffer is fine
+	buf := make([]byte, 512)
 	m, err := discovery.deviceChar.Read(buf)
 	if err != nil {
 		return fmt.Errorf("read back: %w", err)
 	}
 	byteToken, err := hex.DecodeString(token)
 	read := buf[:m]
-	// fmt.Println(hex.EncodeToString(read), hex.EncodeToString(byteToken))
 	if !bytes.Equal(read, byteToken) {
 		return fmt.Errorf("verification failed: invalid token")
 	}
-	// fmt.Println("read token from charUUID:", discovery.deviceChar.UUID())
 	return nil
 }
 
@@ -63,7 +59,6 @@ func writeToPeripheral(discovery *Discovery, token string) error {
 	if err != nil {
 		return fmt.Errorf("write token: %w", err)
 	}
-	// fmt.Println("token write to charUUID:", discovery.deviceChar.UUID())
 	time.Sleep(300 * time.Millisecond)
 	return nil
 }

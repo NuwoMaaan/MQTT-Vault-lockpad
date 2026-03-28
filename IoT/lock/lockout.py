@@ -9,7 +9,6 @@ fail_count = 0
 def publish_lockout(client, generator: ControlComputerLock, vault_id: str) -> None:
     lockout = generator.generate_lock_data().model_dump_json()
     if lockout:
-        # lockpad's id topic: f"vault/padlock/{id}"
         topic = f"vault/padlock/{vault_id}"
         client.publish(topic, lockout)
         console_lock_out()
@@ -23,7 +22,6 @@ def detection_login_attempts(msg) -> str | None:
         payload = VaultPadlockEvents.model_validate(data)
         if payload.event == PadlockEvent.access_attempt and payload.result == EventResult.fail:
             if fail_count > 3:
-                # fail_count = 0
                 return payload.id
             else:
                 fail_count += 1

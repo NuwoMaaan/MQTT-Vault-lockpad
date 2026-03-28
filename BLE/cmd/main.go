@@ -8,7 +8,7 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
-var adapter = bluetooth.DefaultAdapter
+var adapter *bluetooth.Adapter = bluetooth.DefaultAdapter
 
 func main() {
 	if len(os.Args) < 2 {
