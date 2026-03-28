@@ -7,8 +7,9 @@ from pathlib import Path
 import json
 import sys
 import time
+from datetime import datetime, timezone
 from utils.signal_utils import shutdown_flag
-from schemas.padlock_enums import PadlockEvent, EventResult
+from schemas.padlock_enums import PadlockEvent, EventResult, LockState
 from schemas.constants import TOPICS
 
 if TYPE_CHECKING:
@@ -80,19 +81,25 @@ def _cli_access_loop(app: MQTTPadlockApp) -> None:
             continue
 
         code = input("Enter passcode: ").strip()
+        if app.data.status_data.state == LockState.indefinite:
+            break
 
         if not app.ble_present:
             print("Access denied: BLE no longer present")
+            app.data.metric_data.unlock_attempts += 1
             _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.fail)
             continue
 
         if code != app.passcode:
             print("Access denied: incorrect passcode")
+            app.data.metric_data.unlock_attempts += 1
             _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.fail)
             continue
 
         if code == app.passcode and app.ble_present:
             print("Access granted")
+            app.data.status_data.last_unlock = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+            app.data.status_data.state = LockState.unlocked
             _access_attempt_data(app, event=PadlockEvent.access_attempt, result=EventResult.success)
             continue
 

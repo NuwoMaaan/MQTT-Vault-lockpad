@@ -15,11 +15,11 @@ class MQTTPadlockApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
         self.passcode = '000'
-        self.data = PadlockDataGenerator(self.id)
+        self.data = PadlockDataGenerator(id)
         self.ble_device = BLEDevice()
         self.ble_present = False
         self.ble_proc = None
-        self.host_topic = f"vault/padlock/{self.id}"
+        self.host_topic = f"vault/padlock/{id}"
 
 
     def publish(self, client: mqtt_client):
@@ -40,9 +40,9 @@ class MQTTPadlockApp(MQTTApp):
             
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
-            print(f"Received `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
+            print(f"\nReceived `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
             if detect_lock_mechanism(msg, self.host_topic):
-                lock_mechanism(self.data)
+                lock_mechanism(self.data.status_data)
                 
         client.subscribe(TOPICS.control)
         client.subscribe(self.host_topic)

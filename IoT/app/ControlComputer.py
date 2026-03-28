@@ -9,7 +9,7 @@ from app.MqttApp import MQTTApp
 class MQTTControlComputerApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
-        self.data = ControlDataGenerator()
+        self.data = ControlDataGenerator(id)
         
     def publish(self, client: mqtt_client): 
         try:
@@ -26,7 +26,7 @@ class MQTTControlComputerApp(MQTTApp):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
             lock_id = detection_login_attempts(msg)
             if lock_id:                                 
-                publish_lockout(client, self.data, lock_id, self.id)
+                publish_lockout(client, self.data, lock_id)
 
         client.subscribe(TOPICS.status)                              
         client.subscribe(TOPICS.metrics)

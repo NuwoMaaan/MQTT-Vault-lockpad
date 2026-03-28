@@ -33,7 +33,7 @@ class StatusData():
         self.battery = "94%"
         self.error = None
 
-def _generate_padlock_status_data(data: StatusData) -> VaultPadlockStatus:                                         
+def _generate_padlock_status_data(data: StatusData) -> VaultPadlockStatus | None:                                         
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     try:
         status_data = VaultPadlockStatus(
@@ -51,7 +51,6 @@ def _generate_padlock_status_data(data: StatusData) -> VaultPadlockStatus:
     return status_data
 
     
-
 class MetricData():
     def __init__(self, id: str):
         self.device_id = id
@@ -59,7 +58,7 @@ class MetricData():
         self.cpu_formatted = None
         self.temperature = None
         
-def _generate_padlock_metric_data(data: MetricData) -> VaultPadlockMetrics:
+def _generate_padlock_metric_data(data: MetricData) -> VaultPadlockMetrics | None:
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     cpu = psutil.cpu_percent(interval=None)
     data.cpu_formatted = f"{cpu:.2f}%"
@@ -78,14 +77,13 @@ def _generate_padlock_metric_data(data: MetricData) -> VaultPadlockMetrics:
     return metric_data
 
 
-
 class EventData():
     def __init__(self, id: str):
         self.device_id = id 
         self.event = None
         self.result = None
     
-def _generate_padlock_event_data(data: EventData) -> VaultPadlockEvents:
+def _generate_padlock_event_data(data: EventData) -> VaultPadlockEvents | None:
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     try:
         event_data = VaultPadlockEvents(

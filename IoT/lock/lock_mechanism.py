@@ -6,16 +6,16 @@ from data.padlock_data_gen import PadlockDataGenerator
 import json, time
 from utils.console import console_lock_out
 
-def lock_mechanism(generator: PadlockDataGenerator) -> None:
-    generator.state = LockState.indefinite
-    generator.error = "ACCESS FAILURE: TOO MANY UNLOCK ATTEMPTS DETECTED"
+def lock_mechanism(status_data: PadlockDataGenerator) -> None:
+    status_data.state = LockState.indefinite
+    status_data.error = "ACCESS FAILURE: TOO MANY UNLOCK ATTEMPTS DETECTED"
     console_lock_out()
     # Reset to lock state to continue mock functionality
     # But also sleep to show lock state and error change
     # After 30 seconds, attributes return to default
-    time.sleep(30)
-    generator.state = LockState.locked
-    generator.error = None
+    # time.sleep(30)
+    # status_data.state = LockState.locked
+    # status_data.error = None
 
 def detect_lock_mechanism(msg, host_topic: str) -> bool:                    
     try:
