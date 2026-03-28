@@ -1,7 +1,6 @@
 from paho.mqtt import client as mqtt_client
 from schemas.constants import TOPICS
 from utils.signal_utils import shutdown_flag
-from utils.console import console_padlock_out
 from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 from services.VaultPadlockService import VaultPadlockService
 from data.padlock_data_gen import PadlockDataGenerator

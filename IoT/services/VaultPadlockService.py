@@ -9,7 +9,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from utils.signal_utils import shutdown_flag
-from schemas.padlock_enums import PadlockEvent, EventResult, LockState
+from schemas.padlock_enums import PadlockEvent, EventResult, LockState, BleDevice
 from schemas.constants import TOPICS
 
 if TYPE_CHECKING:
@@ -42,13 +42,13 @@ class VaultPadlockService():
                 except json.JSONDecodeError:
                     continue
 
-                if "Present" in event:
+                if BleDevice.present in event:
                         app.ble_present = bool(event["Present"])
                         # print(event)
-                if "LocalName" in event:
-                        ble_device.local_name = event.get('LocalName')
-                        ble_device.token = event.get('Token')
-                        ble_device.UUID = event.get('DeviceUUID')
+                if BleDevice.localname in event:
+                        ble_device.local_name = event.get(BleDevice.localname)
+                        ble_device.token = event.get(BleDevice.token)
+                        ble_device.UUID = event.get(BleDevice.deviceUUID)
                         print(ble_device)
         
         def _stderr_reader(ble_proc: subprocess.Popen) -> None:
@@ -79,11 +79,17 @@ def _cli_access_loop(app: MQTTPadlockApp) -> None:
         if not app.ble_present:
             time.sleep(0.2)
             continue
+        
+        if app.data.status_data.state == LockState.unlocked:
+            print("Vault unlocked, press Enter to lock.")
+            input()
+            app.data.status_data.state = LockState.locked
+            continue
 
         code = input("Enter passcode: ").strip()
         if app.data.status_data.state == LockState.indefinite:
             break
-
+    
         if not app.ble_present:
             print("Access denied: BLE no longer present")
             app.data.metric_data.unlock_attempts += 1
