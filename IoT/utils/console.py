@@ -1,24 +1,10 @@
-from schemas.constants import TOPICS
-
-# def console_padlock_out(result_status, padlock_status_data,
-#                         result_metric, padlock_metric_data,
-#                         ):
-
-#     if result_status[0] == 0:
-#         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_status_data}, topic: {TOPICS.status}\n\r")
-#     else:
-#         print(f"Failed to send message to topic: {TOPICS.status}")
-#     if result_metric[0] == 0:
-#         print(f"Sent: PADLOCK->CONTROL_SYS: {padlock_metric_data}, topic: {TOPICS.metrics}\n\r")
-#     else:
-#         print(f"Failed to send message to topic: {TOPICS.metrics}")
-
+from schemas.constants import Topics
 
 def console_control_out(result_control, control_data):
     if result_control[0] == 0:
-        print(f"Sent: CONTROL_SYS->PADLOCK: {control_data}, topic: {TOPICS.control}\n\r")
+        print(f"Sent: CONTROL_SYS->PADLOCK: {control_data}, topic: {Topics.control}\n\r")
     else:
-        print(f"Failed to send message to topic {TOPICS.control}")
+        print(f"Failed to send message to topic {Topics.control}")
 
 def console_lock_out():
     print(f"LOCKOUT TRIGGERED: Vault Padlock is now: INDEFINITE_LOCKED\n\r")

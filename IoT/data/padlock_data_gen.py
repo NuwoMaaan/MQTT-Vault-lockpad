@@ -1,9 +1,7 @@
 import random
 import psutil
-import time
 from datetime import datetime, timezone
 from schemas.models import VaultPadlockMetrics, VaultPadlockStatus, VaultPadlockEvents
-from schemas.constants import TOPICS
 from pydantic import ValidationError
 
 

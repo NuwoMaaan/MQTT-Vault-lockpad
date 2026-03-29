@@ -1,6 +1,6 @@
 from paho.mqtt import client as mqtt_client
 from data.control_data_gen import ControlDataGenerator
-from schemas.constants import TOPICS
+from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
 from lock.lockout import publish_lockout, detection_login_attempts
 from app.MqttApp import MQTTApp
@@ -26,9 +26,9 @@ class MQTTControlComputerApp(MQTTApp):
             if lock_id:                                 
                 publish_lockout(client, self.data, lock_id)
 
-        client.subscribe(TOPICS.status)                              
-        client.subscribe(TOPICS.metrics)
-        client.subscribe(TOPICS.event)  
+        client.subscribe(Topics.status)                              
+        client.subscribe(Topics.metrics)
+        client.subscribe(Topics.event)  
         client.on_message = on_message
 
 

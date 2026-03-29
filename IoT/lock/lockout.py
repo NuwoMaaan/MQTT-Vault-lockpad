@@ -1,5 +1,5 @@
 import json
-from schemas.constants import TOPICS
+from schemas.constants import Topics
 from schemas.models import VaultPadlockEvents, ControlComputerLock
 from schemas.padlock_enums import EventResult, PadlockEvent
 from utils.console import console_lock_out
@@ -16,7 +16,7 @@ def publish_lockout(client, generator: ControlComputerLock, vault_id: str) -> No
 def detection_login_attempts(msg) -> str | None:
     global fail_count                    
     try:
-        if (msg.topic) != TOPICS.event:
+        if (msg.topic) != Topics.event:
             return None                             
         data = json.loads(msg.payload.decode()) 
         payload = VaultPadlockEvents.model_validate(data)

@@ -1,7 +1,7 @@
 from paho.mqtt import client as mqtt_client
 from app.MqttApp import MQTTApp
 from utils.signal_utils import shutdown_flag
-from schemas.constants import MODE, U_INPUT
+from schemas.constants import MODE, U_INPUT, Topics
 from services.MonitorAppService import MonitorService
 from utils.console import handleheader, ascii_art
 
@@ -64,6 +64,7 @@ if __name__ == '__main__':
 
     app = MonitorApp(id="MQTT CLI Monitor Application")
     ascii_art()
+    print(Topics.metrics)
     app.main_loop()
     
 
