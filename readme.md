@@ -77,8 +77,8 @@ VaultPadlock                       ControlComputer
    https://punchthrough.com/lightblue
    Install application and create a virtual device and follow below instructions:
    - Set name of virtual device: 'padlockAuth'
-   - Create service & characteristic  and takenot of ServiceUUID & CharacteristicUUID
-   - Enable permissions: 'read', 'Write', 'Write without Response'
+   - Create service & characteristic  and take note of ServiceUUID & CharacteristicUUID
+   - Enable permissions: 'read', 'Write', 'Write without Response' for Characteristic
    - Finally, insert respective UUIDs into .env file in /BLE directory
    ```
 4. **IoT devices (execute each in new terminal):**
