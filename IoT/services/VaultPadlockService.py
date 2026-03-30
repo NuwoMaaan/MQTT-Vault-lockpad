@@ -20,10 +20,10 @@ if TYPE_CHECKING:
 class VaultPadlockService():
     @staticmethod
     def BLE(app: MQTTPadlockApp) -> None:
-        ble_cmd_dir = Path(__file__).resolve().parents[2] / "BLE" / "cmd"
+        ble_cmd_dir = Path(__file__).resolve().parents[2] / "BLE" 
         app.ble_present = False
         app.ble_proc = subprocess.Popen(
-            ["go", "run", "./main.go", "detect"],
+            ["go", "run", "cmd/main.go", "detect"],
             cwd=ble_cmd_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
