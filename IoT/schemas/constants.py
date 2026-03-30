@@ -1,3 +1,4 @@
+from enum import StrEnum
 
 class Modes():
     receive: str = "receive"
@@ -8,13 +9,11 @@ class Modes():
 MODE = Modes()
 
 
-class Topics():
-    event: str = "vault/padlock/event" 
-    status: str = "vault/padlock/status"
-    metrics: str = "vault/padlock/metrics"
-    control: str = "vault/padlock/control" 
-
-TOPICS = Topics()
+class Topics(StrEnum):
+    event = "vault/padlock/event"
+    status = "vault/padlock/status"
+    metrics = "vault/padlock/metrics"
+    control = "vault/padlock/control"
 
     
 class UserInput():

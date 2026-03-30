@@ -1,7 +1,6 @@
 from paho.mqtt import client as mqtt_client
 from data.control_data_gen import ControlDataGenerator
-from utils.console import ascii_art
-from schemas.constants import TOPICS
+from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
 from lock.lockout import publish_lockout, detection_login_attempts
 from app.MqttApp import MQTTApp
@@ -10,14 +9,12 @@ from app.MqttApp import MQTTApp
 class MQTTControlComputerApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
-        self.data = ControlDataGenerator()
+        self.data = ControlDataGenerator(id)
         
     def publish(self, client: mqtt_client): 
         try:
             while not shutdown_flag.is_set():
-                # control_data = generator.generate_control_data() # Mock keepalive
-                # result_control = client.publish(TOPICS.control, control_data)
-                # console_control_out(result_control, control_data)
+                # Simulate something like heartbeat ping
                 pass
         except KeyboardInterrupt:
             print('Program Stopped')
@@ -27,18 +24,17 @@ class MQTTControlComputerApp(MQTTApp):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
             lock_id = detection_login_attempts(msg)
             if lock_id:                                 
-                publish_lockout(client, self.data, lock_id, self.id)
+                publish_lockout(client, self.data, lock_id)
 
-        client.subscribe(TOPICS.status)                              
-        client.subscribe(TOPICS.metrics)
-        client.subscribe(TOPICS.event)  
+        client.subscribe(Topics.status)                              
+        client.subscribe(Topics.metrics)
+        client.subscribe(Topics.event)  
         client.on_message = on_message
 
 
 def main():
     app = MQTTControlComputerApp(id="control_device_01")
-    ascii_art()
-    app.run()
+    app.run(ble_proc=None)
     
 
 
