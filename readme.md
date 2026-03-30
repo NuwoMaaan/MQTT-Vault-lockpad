@@ -22,7 +22,7 @@ long-term storage and ease of use for development because it is non-relational d
 Python backend framework to enable integration of Grafana (Infinity) to retrieve logs from MongoDB (MongoDB datasource is limited to Grafana Enterprise version). Using JWT to protect API and only allow Grafana access to routes.
 #### 4. **Grafana**
 Dashboard & data visualization tool use to showcase business/domain data) which EMQX dashboard does not collect (e.g. cpu_temp)
-#### 5. **BLE
+#### 5. **BLE**
 Bluetooth low-energy, used to register a device and provide it a token is used to verify the device is near to allow an access attempt.
 #### 6. **Docker**
 To enable easy & consistent deployments across various platforms.
