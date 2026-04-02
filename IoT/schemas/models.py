@@ -33,6 +33,13 @@ class ControlComputerLock(BaseModel):
     reason: str
     timestamp: datetime
 
+class StoreToken(BaseModel):
+    id: str
+    token: str
+    UUID: str
+    localname: str
+    timestamp: datetime
+
 class TokenRequest(BaseModel):
     id: str
     request: str

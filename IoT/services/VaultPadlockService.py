@@ -9,13 +9,15 @@ import sys
 import time
 from datetime import datetime, timezone
 from utils.signal_utils import shutdown_flag
+from lock.lock_mechanism import detect_lock_mechanism, lock
 from schemas.padlock_enums import PadlockEvent, EventResult, LockState, BleDevice
 from schemas.constants import Topics
-from schemas.models import TokenRequest, TokenResponse
+from schemas.models import TokenRequest, TokenResponse, StoreToken
 
 if TYPE_CHECKING:
     from app.VaultPadlock import MQTTPadlockApp
     from app.ble_device import BLEDevice
+    from data.padlock_data_gen import StatusData
 
 
 class VaultPadlockService():
@@ -50,8 +52,8 @@ class VaultPadlockService():
                         ble_device.local_name = event.get(BleDevice.localname)
                         ble_device.token = event.get(BleDevice.token)
                         ble_device.UUID = event.get(BleDevice.deviceUUID)
-                        print(ble_device)
-        
+                        _store_token_data(app, ble_device)
+
         def _stderr_reader(ble_proc: subprocess.Popen) -> None:
             assert ble_proc.stderr is not None
             for line in ble_proc.stderr:
@@ -59,16 +61,35 @@ class VaultPadlockService():
                 if line:
                     print("BLE stderr:", line)
 
+        def _store_token_data(app: MQTTPadlockApp, ble_device: BLEDevice) -> None:
+            try:
+                app.client.publish(
+                    Topics.token,
+                    StoreToken(
+                        id=app.id,
+                        token=ble_device.token,
+                        UUID=ble_device.UUID,
+                        localname=ble_device.local_name,
+                        timestamp=datetime.now(timezone.utc)
+                    ).model_dump_json()
+                )
+            except Exception as e:
+                print(f"Failed to publish token store data: {e}")
+            
         threading.Thread(target=_stdout_reader, args=(app.ble_proc, app.ble_device), daemon=True).start()
         threading.Thread(target=_stderr_reader, args=(app.ble_proc,), daemon=True).start()
 
-
+    @staticmethod
+    def lock_mechanism(msg, host_topic: str, status_data: StatusData) -> None:
+        if detect_lock_mechanism(msg, host_topic):
+            lock(status_data)
+        
     @staticmethod
     def cli_access(app: MQTTPadlockApp):
         threading.Thread(target=_cli_access_loop, args=(app,), daemon=True).start()
 
     @staticmethod
-    def retrieve_token(app: MQTTPadlockApp, timeout: float = 6.0) -> None:
+    def retrieve_token(app: MQTTPadlockApp, timeout: float = 5.0) -> None:
         token, uuid, localname = None, None, None
 
         def _token_handler(client, userdata, msg):
@@ -94,7 +115,7 @@ class VaultPadlockService():
 
         try:
             app.client.publish(
-                Topics.token_request,
+                Topics.token,
                 TokenRequest(
                     id=app.id,
                     request="token_request",

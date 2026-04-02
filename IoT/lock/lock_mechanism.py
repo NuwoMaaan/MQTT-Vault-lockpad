@@ -5,7 +5,7 @@ from data.padlock_data_gen import PadlockDataGenerator
 import json
 from utils.console import console_lock_out
 
-def lock_mechanism(status_data: PadlockDataGenerator) -> None:
+def lock(status_data: PadlockDataGenerator) -> None:
     status_data.state = LockState.indefinite
     status_data.error = "ACCESS FAILURE: TOO MANY UNLOCK ATTEMPTS DETECTED"
     console_lock_out()

@@ -2,8 +2,8 @@ from paho.mqtt import client as mqtt_client
 from data.control_data_gen import ControlDataGenerator
 from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
-from lock.lockout import publish_lockout, detection_login_attempts
 from app.MqttApp import MQTTApp
+from services.ControlComputerService import ControlComputerService
 
 
 class MQTTControlComputerApp(MQTTApp):
@@ -22,13 +22,13 @@ class MQTTControlComputerApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
-            lock_id = detection_login_attempts(msg)
-            if lock_id:                                 
-                publish_lockout(client, self.data, lock_id)
+            ControlComputerService.detection_mechanism(msg, client, self.data, self.id)
+            ControlComputerService.ble_token_store(msg, client, self)
 
         client.subscribe(Topics.status)                              
         client.subscribe(Topics.metrics)
-        client.subscribe(Topics.event)  
+        client.subscribe(Topics.event)
+        client.subscribe(Topics.token)
         client.on_message = on_message
 
 

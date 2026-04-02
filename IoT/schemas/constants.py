@@ -14,7 +14,7 @@ class Topics(StrEnum):
     status = "vault/padlock/status"
     metrics = "vault/padlock/metrics"
     control = "vault/padlock/control"
-    token_request = "vault/padlock/token/request"
+    token = "vault/padlock/ble/token"
 
     
 class UserInput():
