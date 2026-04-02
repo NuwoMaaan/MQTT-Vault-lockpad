@@ -28,17 +28,18 @@ class StatusData():
         self.device_id = id
         self.state = "LOCKED"
         self.last_unlock = None
-        self.battery = "94%"
+        self.battery = None
         self.error = None
 
 def _generate_padlock_status_data(data: StatusData) -> VaultPadlockStatus | None:                                         
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    battery = f"{psutil.sensors_battery().percent:.2f}%"
     try:
         status_data = VaultPadlockStatus(
             id=data.device_id,
             state=data.state,
             last_unlock=data.last_unlock,
-            battery=data.battery,
+            battery=battery,
             error=data.error,
             timestamp=timestamp,
             )

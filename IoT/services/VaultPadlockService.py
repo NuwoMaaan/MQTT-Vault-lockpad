@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from utils.signal_utils import shutdown_flag
 from schemas.padlock_enums import PadlockEvent, EventResult, LockState, BleDevice
 from schemas.constants import Topics
+from schemas.models import TokenRequest, TokenResponse
 
 if TYPE_CHECKING:
     from app.VaultPadlock import MQTTPadlockApp
@@ -64,7 +65,59 @@ class VaultPadlockService():
 
     @staticmethod
     def cli_access(app: MQTTPadlockApp):
-        threading.Thread(target=_cli_access_loop, args=(app,), daemon=True,).start()
+        threading.Thread(target=_cli_access_loop, args=(app,), daemon=True).start()
+
+    @staticmethod
+    def retrieve_token(app: MQTTPadlockApp, timeout: float = 6.0) -> None:
+        token, uuid, localname = None, None, None
+
+        def _token_handler(client, userdata, msg):
+            nonlocal token, uuid, localname
+            try:
+                data = json.loads(msg.payload.decode())
+                payload = TokenResponse.model_validate(data)
+            except (json.JSONDecodeError, ValueError):
+                return
+
+            if msg.topic != app.host_topic:
+                return
+            if payload.id != app.id:
+                return
+            if not payload.token or not payload.UUID or not payload.localname:
+                return
+            token = payload.token
+            uuid = payload.UUID
+            localname = payload.localname
+
+        app.client.subscribe(app.host_topic)
+        app.client.message_callback_add(app.host_topic, _token_handler)
+
+        try:
+            app.client.publish(
+                Topics.token_request,
+                TokenRequest(
+                    id=app.id,
+                    request="token_request",
+                    timestamp=datetime.now(timezone.utc)
+                ).model_dump_json()
+            )
+
+            end_time = time.time() + timeout
+            while time.time() < end_time:
+                app.client.loop(timeout=0.2)
+                if token and uuid and localname is not None:
+                    break
+
+        finally:
+            app.client.message_callback_remove(app.host_topic)
+
+        if token and uuid and localname is not None:
+            app.ble_device.token = token
+            app.ble_device.UUID = uuid
+            app.ble_device.local_name = localname
+            print(f"Retrieved token: {token}, UUID: {uuid}, local_name: {localname}")
+        else:
+            print("Failed to retrieve token within timeout")
 
 
 def _cli_access_loop(app: MQTTPadlockApp) -> None:
