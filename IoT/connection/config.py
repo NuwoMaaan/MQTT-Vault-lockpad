@@ -13,4 +13,6 @@ class Settings(BaseSettings):
     ADMIN_USER: str
     ADMIN_PASS: str
 
+    API_KEY: str
+
 settings = Settings()
