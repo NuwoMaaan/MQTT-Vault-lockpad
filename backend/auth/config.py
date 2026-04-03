@@ -4,6 +4,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    API_KEY: str
+
     JWT_SECRET_KEY: str
     EXPIRE: int
     ALGORITHM: str = "HS256"
