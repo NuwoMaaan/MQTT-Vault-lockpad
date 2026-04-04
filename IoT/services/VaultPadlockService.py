@@ -12,7 +12,7 @@ from utils.signal_utils import shutdown_flag
 from lock.lock_mechanism import detect_lock_mechanism, lock
 from schemas.padlock_enums import PadlockEvent, EventResult, LockState, BleDevice
 from schemas.constants import Topics
-from schemas.models import TokenRequest, TokenResponse, StoreToken
+from schemas.models import TokenRequest, BleData
 
 if TYPE_CHECKING:
     from app.VaultPadlock import MQTTPadlockApp
@@ -65,7 +65,7 @@ class VaultPadlockService():
             try:
                 app.client.publish(
                     Topics.token,
-                    StoreToken(
+                    BleData(
                         id=app.id,
                         token=ble_device.token,
                         UUID=ble_device.UUID,
@@ -89,14 +89,14 @@ class VaultPadlockService():
         threading.Thread(target=_cli_access_loop, args=(app,), daemon=True).start()
 
     @staticmethod
-    def retrieve_token(app: MQTTPadlockApp, timeout: float = 5.0) -> None:
+    def retrieve_token(app: MQTTPadlockApp, timeout: float = 10.0) -> None:
         token, uuid, localname = None, None, None
 
         def _token_handler(client, userdata, msg):
             nonlocal token, uuid, localname
             try:
                 data = json.loads(msg.payload.decode())
-                payload = TokenResponse.model_validate(data)
+                payload = BleData.model_validate(data)
             except (json.JSONDecodeError, ValueError):
                 return
 
@@ -137,8 +137,14 @@ class VaultPadlockService():
             app.ble_device.UUID = uuid
             app.ble_device.local_name = localname
             print(f"Retrieved token: {token}, UUID: {uuid}, local_name: {localname}")
+            # FROM HERE, BLE DATA CAN BE USED IN SUBPROCESS
+            # app's ble_device values are updated and can be used in: def BLE(app: MQTTPadlockApp)
         else:
-            print("Failed to retrieve token within timeout")
+            # WILL ALSO NEED TO ACCOUNT FOR NONE BLE DATA VALUES
+            # PROBABLY WILL FOLLOW CURRENT AFTER BLE REGISTRATION.
+            # have golang program handle this by reading in passed in variables as none, therefore need new registration.
+            print("INFO: Failed to retrieve BLE data within timeout")
+            print("INFO: Preset BLE device for new registration")
 
 
 def _cli_access_loop(app: MQTTPadlockApp) -> None:

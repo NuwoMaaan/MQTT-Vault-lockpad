@@ -1,12 +1,13 @@
 import json
+from data.control_data_gen import LockData
 from schemas.constants import Topics
-from schemas.models import VaultPadlockEvents, ControlComputerLock
+from schemas.models import VaultPadlockEvents
 from schemas.padlock_enums import EventResult, PadlockEvent
 from utils.console import console_lock_out
 
 fail_count = 0
 
-def publish_lockout(client, generator: ControlComputerLock, vault_id: str) -> None:
+def publish_lockout(client, generator: LockData, vault_id: str) -> None:
     lockout = generator.generate_lock_data().model_dump_json()
     if lockout:
         topic = f"vault/padlock/{vault_id}"

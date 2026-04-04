@@ -38,16 +38,9 @@ class TokenRequest(BaseModel):
     request: str
     timestamp: datetime
 
-class BleToken(BaseModel):
+class BleData(BaseModel):
     id: str
     UUID: str
     token: str
     localname: str
     timestamp: datetime
-
-# class StoreToken(BaseModel):
-#     id: str
-#     token: str
-#     UUID: str
-#     localname: str
-#     timestamp: datetime
