@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -10,9 +11,14 @@ import (
 
 var adapter *bluetooth.Adapter = bluetooth.DefaultAdapter
 
+const (
+	registerArg string = "register"
+	detectArg   string = "detect"
+)
+
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: main.go detect")
+		fmt.Fprintln(os.Stderr, "usage: main.go detect | register")
 		os.Exit(1)
 	}
 
@@ -21,7 +27,7 @@ func main() {
 	}
 
 	switch os.Args[1] {
-	case "detect":
+	case registerArg:
 		ble, err := internal.Register(adapter)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -34,6 +40,20 @@ func main() {
 		}
 
 		select {} // keep process alive
+
+	case detectArg:
+		var ble internal.BLEData
+		if err := json.NewDecoder(os.Stdin).Decode(&ble); err != nil {
+			fmt.Fprintln(os.Stderr, "stdin decode error:", err)
+			os.Exit(1)
+		}
+
+		if err := internal.ListenAndDetect(adapter, &ble); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		select {}
 
 	default:
 		fmt.Fprintln(os.Stderr, "unknown mode")

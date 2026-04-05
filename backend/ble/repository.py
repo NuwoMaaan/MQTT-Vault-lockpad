@@ -9,4 +9,5 @@ def get_data(collection: Collection) -> BleData | None:
     return None
 
 def store_data(collection: Collection, ble_data: BleData) -> None:
-    collection.update_one({"uuid": ble_data.UUID}, {"$set": ble_data.model_dump(mode="json")}, upsert=True)
+    doc = ble_data.model_dump(mode="json")
+    collection.update_one({"id": doc["id"]}, {"$set": doc}, upsert=True)

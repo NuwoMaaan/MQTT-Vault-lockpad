@@ -31,7 +31,7 @@ class MQTTPadlockApp(MQTTApp):
                     client.publish(Topics.status, padlock_status_data)
                 if padlock_metric_data is not None:
                     client.publish(Topics.metrics, padlock_metric_data)
-                time.sleep(10)
+                time.sleep(20)
         except KeyboardInterrupt:
             print('programmed stopped')
 

@@ -1,6 +1,6 @@
 
 class BLEDevice():
-    def __int__(self):
+    def __init__(self):
         self.UUID = None
         self.token = None
         self.local_name = None

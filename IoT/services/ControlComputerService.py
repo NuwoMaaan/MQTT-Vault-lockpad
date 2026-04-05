@@ -44,11 +44,11 @@ class ControlComputerService:
 
         try:
             payload = TokenRequest.model_validate(data)
-            ble_token = _get_ble_data(cls.jwt)
-            if ble_token:
-                _transport_ble(ble_token, client, payload.id)
-            print("no ble data found for token request")
-            return
+            ble_data = _get_ble_data(cls.jwt)
+            if ble_data:
+                _transport_ble(ble_data, client, payload.id)
+            else:
+                print("no ble data found for token request")
         except ValidationError:
             pass
 

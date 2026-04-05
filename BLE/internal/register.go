@@ -43,7 +43,7 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		return nil, err
 	}
 
-	ble = newBLEData(
+	ble = NewBLEData(
 		device.Address.String(),
 		device.LocalName(),
 		token,
@@ -53,7 +53,7 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 	return ble, nil
 }
 
-func newBLEData(uuid string, localName string, token string) *BLEData {
+func NewBLEData(uuid string, localName string, token string) *BLEData {
 	return &BLEData{
 		DeviceUUID: uuid,
 		LocalName:  localName,

@@ -23,16 +23,36 @@ if TYPE_CHECKING:
 class VaultPadlockService():
     @staticmethod
     def BLE(app: MQTTPadlockApp) -> None:
+
+        # 'register' == No BLE data, will register and return BLE data in subprocess.
+        # 'detect' == BLE data already exists, will skip registration and go to listening & detect state. 
+        cmd_arg = "register"
+        if (app.ble_device.local_name is not None
+            and app.ble_device.UUID is not None
+            and app.ble_device.token is not None
+        ):
+            cmd_arg = "detect"
+
         ble_cmd_dir = Path(__file__).resolve().parents[2] / "BLE" 
         app.ble_present = False
         app.ble_proc = subprocess.Popen(
-            ["go", "run", "cmd/main.go", "detect"],
+            ["go", "run", "cmd/main.go", cmd_arg],
             cwd=ble_cmd_dir,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
         )
+    
+        if cmd_arg == "detect":
+            app.ble_proc.stdin.write(json.dumps({
+                "DeviceUUID": app.ble_device.UUID,
+                "LocalName": app.ble_device.local_name,
+                "Token": app.ble_device.token
+            }) + "\n")
+            app.ble_proc.stdin.flush()
+
         def _stdout_reader(ble_proc: subprocess.Popen, ble_device: BLEDevice) -> None: 
             assert ble_proc.stdout is not None
             for line in ble_proc.stdout:
@@ -136,15 +156,11 @@ class VaultPadlockService():
             app.ble_device.token = token
             app.ble_device.UUID = uuid
             app.ble_device.local_name = localname
-            print(f"Retrieved token: {token}, UUID: {uuid}, local_name: {localname}")
-            # FROM HERE, BLE DATA CAN BE USED IN SUBPROCESS
-            # app's ble_device values are updated and can be used in: def BLE(app: MQTTPadlockApp)
+            print(f"INFO: Retrieved token: {token}, UUID: {uuid}, local_name: {localname}")
+            print("INFO: Sending BLE data to subprocess... (arg=detect)")
         else:
-            # WILL ALSO NEED TO ACCOUNT FOR NONE BLE DATA VALUES
-            # PROBABLY WILL FOLLOW CURRENT AFTER BLE REGISTRATION.
-            # have golang program handle this by reading in passed in variables as none, therefore need new registration.
             print("INFO: Failed to retrieve BLE data within timeout")
-            print("INFO: Preset BLE device for new registration")
+            print("INFO: Present BLE device for new registration")
 
 
 def _cli_access_loop(app: MQTTPadlockApp) -> None:
