@@ -14,6 +14,8 @@ type PresenceEvent struct {
 	DeviceUUID string
 }
 
+// ISSUE: changing these values to being too fast, can result in unpredictable behaviour
+// currently works with given values.
 const (
 	presenceTimeout = 4 * time.Second
 	checkInterval   = 500 * time.Millisecond

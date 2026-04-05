@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 from schemas.constants import Topics
-from schemas.models import TokenRequest, BleData
+from schemas.models import BleDataRequest, BleData
 from lock.lockout import publish_lockout, detection_login_attempts
 from connection.config import settings
 from pydantic import ValidationError
@@ -41,17 +41,18 @@ class ControlComputerService:
             return 
         except ValidationError:
             pass
-
+        
         try:
-            payload = TokenRequest.model_validate(data)
+            payload = BleDataRequest.model_validate(data)
             ble_data = _get_ble_data(cls.jwt)
             if ble_data:
                 _transport_ble(ble_data, client, payload.id)
             else:
-                print("no ble data found for token request")
+                print("no ble data found for request")
         except ValidationError:
             pass
 
+# Send BLE data if any, back to padlock
 def _transport_ble(ble_data: BleData, client, vault_id: str) -> None:
     topic = f"vault/padlock/{vault_id}"
     ble_data_json = ble_data.model_dump_json()

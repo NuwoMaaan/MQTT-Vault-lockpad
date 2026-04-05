@@ -9,6 +9,9 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
+// ConnectToPeripheral connects to the BLE device, discovers the service and characteristic,
+// and performs read/write operation based on the flag.
+// Write: for token insertion, Read: for token verification.
 func ConnectToPeripheral(adapter *bluetooth.Adapter, device bluetooth.ScanResult, token string, flag string) error {
 	conn, err := adapter.Connect(device.Address, bluetooth.ConnectionParams{})
 	if err != nil {

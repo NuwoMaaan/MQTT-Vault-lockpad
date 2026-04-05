@@ -12,7 +12,7 @@ from utils.signal_utils import shutdown_flag
 from lock.lock_mechanism import detect_lock_mechanism, lock
 from schemas.padlock_enums import PadlockEvent, EventResult, LockState, BleDevice
 from schemas.constants import Topics
-from schemas.models import TokenRequest, BleData
+from schemas.models import BleDataRequest, BleData
 
 if TYPE_CHECKING:
     from app.VaultPadlock import MQTTPadlockApp
@@ -82,7 +82,6 @@ class VaultPadlockService():
                 if line:
                     print("BLE stderr:", line)
 
-        # 
         def _store_ble_data(app: MQTTPadlockApp, ble_device: BLEDevice) -> None:
             try:
                 app.client.publish(
@@ -101,17 +100,20 @@ class VaultPadlockService():
         threading.Thread(target=_stdout_reader, args=(app.ble_proc, app.ble_device), daemon=True).start()
         threading.Thread(target=_stderr_reader, args=(app.ble_proc,), daemon=True).start()
 
+
     @staticmethod
     def lock_mechanism(msg, host_topic: str, status_data: StatusData) -> None:
         if detect_lock_mechanism(msg, host_topic):
             lock(status_data)
         
+
     @staticmethod
     def cli_access(app: MQTTPadlockApp):
         threading.Thread(target=_cli_access_loop, args=(app,), daemon=True).start()
 
+    # Briefly 
     @staticmethod
-    def retrieve_token(app: MQTTPadlockApp, timeout: float = 10.0) -> None:
+    def retrieve_ble_data(app: MQTTPadlockApp, timeout: float = 10.0) -> None:
         token, uuid, localname = None, None, None
 
         def _token_handler(client, userdata, msg):
@@ -138,9 +140,9 @@ class VaultPadlockService():
         try:
             app.client.publish(
                 Topics.ble,
-                TokenRequest(
+                BleDataRequest(
                     id=app.id,
-                    request="token _request",
+                    request="ble_request",
                     timestamp=datetime.now(timezone.utc)
                 ).model_dump_json()
             )
@@ -148,13 +150,13 @@ class VaultPadlockService():
             end_time = time.time() + timeout
             while time.time() < end_time:
                 app.client.loop(timeout=0.2)
-                if token and uuid and localname is not None:
+                if token is not None and uuid is not None and localname is not None:
                     break
 
         finally:
             app.client.message_callback_remove(app.host_topic)
 
-        if token and uuid and localname is not None:
+        if token is not None and uuid is not None and localname is not None:
             app.ble_device.token = token
             app.ble_device.UUID = uuid
             app.ble_device.local_name = localname
@@ -222,7 +224,3 @@ def _access_attempt_data(app: MQTTPadlockApp, event: str, result: str):
     event_data = app.data.generate_event_data(event=event, result=result)
     if event_data is not None:
         app.client.publish(Topics.event, event_data)
-
-        
-
-

@@ -48,7 +48,7 @@ class MQTTPadlockApp(MQTTApp):
             
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
-    VaultPadlockService.retrieve_token(app)
+    VaultPadlockService.retrieve_ble_data(app)
     VaultPadlockService.BLE(app)
     VaultPadlockService.cli_access(app)
     app.run(app.ble_proc)

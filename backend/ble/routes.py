@@ -8,6 +8,8 @@ from auth.security.dependencies import require_token
 COLLECTION = "BleData"
 router = APIRouter()
 
+# Future implementation: have a different Dependency function that checks for specific service permissions instead of generic token
+
 @router.get("/token", dependencies=[Depends(require_token)], response_model=BleData)
 def get_ble_data():
     db = get_db_conn()
@@ -18,7 +20,6 @@ def get_ble_data():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BLE data not found")
     
     return data
-
 
 @router.post("/token", dependencies=[Depends(require_token)])
 def store_ble_data(payload: BleData):

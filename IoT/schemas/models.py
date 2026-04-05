@@ -33,7 +33,7 @@ class ControlComputerLock(BaseModel):
     reason: str
     timestamp: datetime
 
-class TokenRequest(BaseModel):
+class BleDataRequest(BaseModel):
     id: str
     request: str
     timestamp: datetime
