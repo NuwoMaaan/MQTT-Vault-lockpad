@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 class VaultPadlockService():
     @staticmethod
     def BLE(app: MQTTPadlockApp) -> None:
-
         # 'register' == No BLE data, will register and return BLE data in subprocess.
         # 'detect' == BLE data already exists, will skip registration and go to listening & detect state. 
         cmd_arg = "register"
@@ -33,6 +32,7 @@ class VaultPadlockService():
         ):
             cmd_arg = "detect"
 
+        # Start BLE subprocess for BLE bluetooth operation 
         ble_cmd_dir = Path(__file__).resolve().parents[2] / "BLE" 
         app.ble_present = False
         app.ble_proc = subprocess.Popen(
@@ -44,7 +44,8 @@ class VaultPadlockService():
             text=True,
             bufsize=1,
         )
-    
+        
+        # stdin write to subprocess BLE data
         if cmd_arg == "detect":
             app.ble_proc.stdin.write(json.dumps({
                 "DeviceUUID": app.ble_device.UUID,
@@ -53,6 +54,7 @@ class VaultPadlockService():
             }) + "\n")
             app.ble_proc.stdin.flush()
 
+        # stdout read from subprocess to get BLE presense 
         def _stdout_reader(ble_proc: subprocess.Popen, ble_device: BLEDevice) -> None: 
             assert ble_proc.stdout is not None
             for line in ble_proc.stdout:
@@ -64,15 +66,14 @@ class VaultPadlockService():
                     event = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-
+                
                 if BleDevice.present in event:
                         app.ble_present = bool(event["Present"])
-                        # print(event)
                 if BleDevice.localname in event:
                         ble_device.local_name = event.get(BleDevice.localname)
                         ble_device.token = event.get(BleDevice.token)
                         ble_device.UUID = event.get(BleDevice.deviceUUID)
-                        _store_token_data(app, ble_device)
+                        _store_ble_data(app, ble_device)
 
         def _stderr_reader(ble_proc: subprocess.Popen) -> None:
             assert ble_proc.stderr is not None
@@ -81,10 +82,11 @@ class VaultPadlockService():
                 if line:
                     print("BLE stderr:", line)
 
-        def _store_token_data(app: MQTTPadlockApp, ble_device: BLEDevice) -> None:
+        # 
+        def _store_ble_data(app: MQTTPadlockApp, ble_device: BLEDevice) -> None:
             try:
                 app.client.publish(
-                    Topics.token,
+                    Topics.ble,
                     BleData(
                         id=app.id,
                         token=ble_device.token,
@@ -135,10 +137,10 @@ class VaultPadlockService():
 
         try:
             app.client.publish(
-                Topics.token,
+                Topics.ble,
                 TokenRequest(
                     id=app.id,
-                    request="token_request",
+                    request="token _request",
                     timestamp=datetime.now(timezone.utc)
                 ).model_dump_json()
             )
@@ -161,8 +163,17 @@ class VaultPadlockService():
         else:
             print("INFO: Failed to retrieve BLE data within timeout")
             print("INFO: Present BLE device for new registration")
+            while True:
+                choice = input("INFO: y - BLE device is activated?, n - Exit program to retry (y/n): ").strip().lower()
+                if choice in ['y', 'n']:
+                    break
 
-
+            if choice == 'n':
+                print("INFO: Exiting program.")
+                shutdown_flag.set()
+                sys.exit(0)
+            
+        
 def _cli_access_loop(app: MQTTPadlockApp) -> None:
     last_state = None
 

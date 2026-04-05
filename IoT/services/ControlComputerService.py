@@ -23,8 +23,8 @@ class ControlComputerService:
             publish_lockout(client, data, lock_id)
     
     @classmethod
-    def ble_token_handler(cls, msg, client) -> None:
-        if msg.topic != Topics.token:
+    def ble_data_handler(cls, msg, client) -> None:
+        if msg.topic != Topics.ble:
             return
         if not cls.jwt:
             cls.jwt = _create_jwt_token(settings.API_KEY)

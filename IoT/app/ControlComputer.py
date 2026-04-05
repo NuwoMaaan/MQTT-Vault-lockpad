@@ -23,12 +23,12 @@ class MQTTControlComputerApp(MQTTApp):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
             ControlComputerService.detection_mechanism(msg, client, self.data.lock_data, self.id)
-            ControlComputerService.ble_token_handler(msg, client)
+            ControlComputerService.ble_data_handler(msg, client)
 
         client.subscribe(Topics.status)                              
         client.subscribe(Topics.metrics)
         client.subscribe(Topics.event)
-        client.subscribe(Topics.token)
+        client.subscribe(Topics.ble)
         client.on_message = on_message
 
 
