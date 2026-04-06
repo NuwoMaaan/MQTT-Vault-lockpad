@@ -123,7 +123,7 @@ MQTT Lockpad/
 │   ├── emqx/          # Provisioning configurations & init automation
 │   ├── lock/          # Indefinite lock detection & enforcement logic
 │   ├── schemas/       # Pydantic models for data validation
-│   ├── services/      # Monitor app logic for interface interaction
+│   ├── services/      # MonitorApp, ControlComputer & VaultPadlock service classes
 │   └── utils/         # Helper modules (console output, lockout detection, signal handling)
 │
 ├── backend/           # FastAPI backend
