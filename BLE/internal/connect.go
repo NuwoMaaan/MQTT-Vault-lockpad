@@ -12,6 +12,12 @@ import (
 // ConnectToPeripheral connects to the BLE device, discovers the service and characteristic,
 // and performs read/write operation based on the flag.
 // Write: for token insertion, Read: for token verification.
+
+const (
+	writeFlag string = "write"
+	readFlag  string = "read"
+)
+
 func ConnectToPeripheral(adapter *bluetooth.Adapter, device bluetooth.ScanResult, token string, flag string) error {
 	conn, err := adapter.Connect(device.Address, bluetooth.ConnectionParams{})
 	if err != nil {
@@ -24,13 +30,13 @@ func ConnectToPeripheral(adapter *bluetooth.Adapter, device bluetooth.ScanResult
 		return fmt.Errorf("discovery error: %w", err)
 	}
 
-	if flag == "read" {
+	if flag == readFlag {
 		if err := readFromPeripheral(discovery, token); err != nil {
 			return fmt.Errorf("read peripheral fail: %w", err)
 		}
 	}
 
-	if flag == "write" {
+	if flag == writeFlag {
 		if err := writeToPeripheral(discovery, token); err != nil {
 			return fmt.Errorf("write peripheral error: %w", err)
 		}

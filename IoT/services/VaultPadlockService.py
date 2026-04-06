@@ -111,7 +111,7 @@ class VaultPadlockService():
     def cli_access(app: MQTTPadlockApp):
         threading.Thread(target=_cli_access_loop, args=(app,), daemon=True).start()
 
-    # Briefly 
+
     @staticmethod
     def retrieve_ble_data(app: MQTTPadlockApp, timeout: float = 10.0) -> None:
         token, uuid, localname = None, None, None
