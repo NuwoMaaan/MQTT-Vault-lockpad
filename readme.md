@@ -40,6 +40,7 @@ To enable easy & consistent deployments across various platforms.
 ### Data Flow (MQTT)
 
 ```
+
 VaultPadlock                       ControlComputer
    |                                        |
    | --- publish status,metrics,events ---> |
