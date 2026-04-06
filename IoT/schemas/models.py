@@ -33,4 +33,14 @@ class ControlComputerLock(BaseModel):
     reason: str
     timestamp: datetime
 
-    
+class BleDataRequest(BaseModel):
+    id: str
+    request: str
+    timestamp: datetime
+
+class BleData(BaseModel):
+    id: str
+    UUID: str
+    token: str
+    localname: str
+    timestamp: datetime

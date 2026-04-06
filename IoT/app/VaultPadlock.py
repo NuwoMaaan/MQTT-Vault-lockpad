@@ -1,7 +1,6 @@
 from paho.mqtt import client as mqtt_client
 from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
-from lock.lock_mechanism import detect_lock_mechanism, lock_mechanism
 from services.VaultPadlockService import VaultPadlockService
 from data.padlock_data_gen import PadlockDataGenerator
 from app.MqttApp import MQTTApp
@@ -32,7 +31,7 @@ class MQTTPadlockApp(MQTTApp):
                     client.publish(Topics.status, padlock_status_data)
                 if padlock_metric_data is not None:
                     client.publish(Topics.metrics, padlock_metric_data)
-                time.sleep(5)
+                time.sleep(20)
         except KeyboardInterrupt:
             print('programmed stopped')
 
@@ -40,8 +39,7 @@ class MQTTPadlockApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"\nReceived `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
-            if detect_lock_mechanism(msg, self.host_topic):
-                lock_mechanism(self.data.status_data)
+            VaultPadlockService.lock_mechanism(msg, self.host_topic, self.data.status_data)
                 
         client.subscribe(Topics.control)
         client.subscribe(self.host_topic)
@@ -50,6 +48,7 @@ class MQTTPadlockApp(MQTTApp):
             
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
+    VaultPadlockService.retrieve_ble_data(app)
     VaultPadlockService.BLE(app)
     VaultPadlockService.cli_access(app)
     app.run(app.ble_proc)

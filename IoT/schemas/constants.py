@@ -14,6 +14,7 @@ class Topics(StrEnum):
     status = "vault/padlock/status"
     metrics = "vault/padlock/metrics"
     control = "vault/padlock/control"
+    ble = "vault/padlock/ble"
 
     
 class UserInput():

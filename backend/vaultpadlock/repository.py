@@ -8,6 +8,7 @@ T = TypeVar("T", VaultPadlockStatus, VaultPadlockEvents, VaultPadlockMetrics)
 
 def fetch_logs(schema: Type[T], collection: Collection, start: datetime, end: datetime) -> list[T]:
     
+    # timestamp is converted to string format because EMQX broker action inserts as string
     cursor = collection.find(
         {"timestamp": {"$gte": start.isoformat(timespec="seconds"), "$lte": end.isoformat(timespec="seconds")}})
     return [schema(**doc) for doc in cursor]

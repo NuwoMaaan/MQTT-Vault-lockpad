@@ -41,7 +41,7 @@ func Discover(conn *bluetooth.Device) (*Discovery, error) {
 	if err := loadEnv(); err != nil {
 		return nil, err
 	}
-
+	// ServiceUUID and CharacteristicUUID required to match and hardcoded
 	serviceUUIDStr := os.Getenv("ServiceUUID")
 	charUUIDStr := os.Getenv("CharacteristicUUID")
 

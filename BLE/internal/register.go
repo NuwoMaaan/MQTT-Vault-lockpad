@@ -16,6 +16,8 @@ type BLEData struct {
 	Token      string
 }
 
+// Register scans for the BLE device, connects to it, generates a token and writes to the device,
+// and outputs the BLE data to stdout.
 func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 	var ble *BLEData
 	found := make(chan bluetooth.ScanResult, 1)
@@ -43,7 +45,7 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 		return nil, err
 	}
 
-	ble = newBLEData(
+	ble = NewBLEData(
 		device.Address.String(),
 		device.LocalName(),
 		token,
@@ -53,7 +55,7 @@ func Register(adapter *bluetooth.Adapter) (*BLEData, error) {
 	return ble, nil
 }
 
-func newBLEData(uuid string, localName string, token string) *BLEData {
+func NewBLEData(uuid string, localName string, token string) *BLEData {
 	return &BLEData{
 		DeviceUUID: uuid,
 		LocalName:  localName,
@@ -62,7 +64,7 @@ func newBLEData(uuid string, localName string, token string) *BLEData {
 }
 
 func tokenGenerate() (string, error) {
-	b := make([]byte, 32) // 32 bytes = 256-bit token
+	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate token: %w", err)

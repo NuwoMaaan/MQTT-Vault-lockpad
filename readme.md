@@ -2,13 +2,13 @@
 
 **MQTT** (Message Queuing Telemetry Transport) is a lightweight, publish–subscribe messaging protocol used for reliable communication between devices in distributed systems. It operates through a central broker that manages message exchange between clients, allowing devices to publish data to topics and subscribe to receive updates. This design enables efficient, real-time, and scalable communication, making MQTT widely used in IoT, automation, and remote monitoring applications.
 
-**MQTT Vault Padlock** Is a project to demostrate MQTT communications and furthermore incorporate a data logging & visualization pipeline using `MongoDB` for long-lived storage, `Grafana` (Infinity) for domain data visualization and `FastAPI` backend for log retrieval from the MongoDB and then use in Grafana. `EMQX` is used as the MQTT broker with the community version `Docker` image, the setup for configurations neccessary for MQTT client connection(s) and MongoDB connector are automated in a init script. TinyGo Bluetooth library is used to incorporate `BLE` where a peripheral device can be registered and used in authentication to access the vault padlock, acting as a central BLE device. To protect the API routes, JWT tokens are used to authenitcate access. An additional init script is used to configure Grafana Infinity authentication method. Working default settings are found in `.env` files.
+**MQTT Vault Padlock** Is a project to demostrate MQTT communications and furthermore incorporate a data logging & visualization pipeline using `MongoDB` for long-lived storage, `Grafana` (Infinity) for domain data visualization and `FastAPI` backend for log & BLE data retrieval from the MongoDB. `EMQX` is used as the MQTT broker with the community version `Docker` image, the setup for configurations neccessary for MQTT client connection(s) and MongoDB connector are automated in a init script. TinyGo Bluetooth library is used to incorporate `BLE` where a peripheral device can be registered and used in authentication to access the vault padlock, acting as a central BLE device. To protect the API routes, JWT tokens are used to authenitcate access. An additional init script is used to configure Grafana Infinity authentication method. Working default settings are found in `.env` files, (BLE peripheral service & characteristic requires manual input into /BLE/.env)
 
 MQTT communications, is demonstrated through arbitrary data generation from `(VaultPadlock)`. Data is communicated to another MQTT app simulating a control device `(ControlComputer)`, it processes received data and detects a failed access attempts on the padlock and triggers a response to indefinitely lock. The Monitor application `(MonitorApp)` allows for selectively subscribing to topics to view communications and send message to any specificied topic, this is a basic CLI version of `MQTTX`. 
 
 Defined topics in this project follow the structure as: `vault/padlock/{endpoint}`
 
-**NOTE: This project has no pratical use as an effective vault lockpad system and does not inteface with hardware.**
+**NOTE: This project has no pratical use as an effective vault lockpad system and does not interface with hardware.**
 
 ---
 
@@ -37,18 +37,26 @@ To enable easy & consistent deployments across various platforms.
 
 ---
 
+### **System Architecture** 
+
+<img src="architecture.png" alt="screenshot" width="700">
+
+---
+
 ### Data Flow (MQTT)
 
 ```
-VaultPadlock                       ControlComputer
-   |                                        |
-   | --- publish status,metrics,events ---> |
-   |                                        |
-   | <---  publish control commands ------  |
-   |                                        |
-   | <---   publish lockout signal  ------  |  (when attempts > 3)
-   |                                        |
-   +-- enters INDEFINITE_LOCKED state
+(Note: EMQX broker is transparent in diagram)
+
+VaultPadlock                               ControlComputer
+   |                                             |
+   | --- publish status,metrics,events,ble ----> |  Process MQTT packets
+   |                                             | 
+   | <-----------  publish ble data  ----------- |  
+   |                                             |
+   | <--------  publish lockout signal  -------  |  (when access attempts > 3)
+   |                                             |
+   +-------- enters INDEFINITE_LOCKED state
 ```
 ---
 
@@ -87,6 +95,8 @@ VaultPadlock                       ControlComputer
    uv run -m app.VaultPadlock (activate LightBlue virtual device too)
    uv run -m app.ControlComputer
    uv run -m app.MonitorApp (Optional)
+
+   (Note: Once BLE device is registered, authentication would only be possible with this device unless manually removed from MongoDB. Program's flow will adjust to new registration or if BLE data exists accordingly)
    ```
 5. **View EMQX dashboard, MongoDB, Grafana:**
    ```
@@ -113,13 +123,14 @@ MQTT Lockpad/
 │   ├── emqx/          # Provisioning configurations & init automation
 │   ├── lock/          # Indefinite lock detection & enforcement logic
 │   ├── schemas/       # Pydantic models for data validation
-│   ├── services/      # Monitor app logic for interface interaction
+│   ├── services/      # MonitorApp, ControlComputer & VaultPadlock service classes
 │   └── utils/         # Helper modules (console output, lockout detection, signal handling)
 │
 ├── backend/           # FastAPI backend
-|   ├── auth/          # Route authentication with JWT
+|   ├── auth/          # Route authentication & creation for jwt
 │   ├── connection/    # MongoDB Connection
 │   └── vaultpadlock/  # Routes, schema & repository for vault padlock
+│   └── ble/           # Route, schema & repository for ble data
 │
 └── grafana/           # Store provisioning config & JSON files
     ├── dashboards/    # Dashboard structure and settings
