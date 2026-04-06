@@ -37,19 +37,26 @@ To enable easy & consistent deployments across various platforms.
 
 ---
 
+### **System Architecture** 
+
+<img src="architecture.png" alt="screenshot" width="700">
+
+---
+
 ### Data Flow (MQTT)
 
 ```
+(Note: EMQX broker is transparent in diagram)
 
-VaultPadlock                       ControlComputer
-   |                                        |
-   | --- publish status,metrics,events ---> |
-   |                                        |
-   | <---  publish control commands ------  |
-   |                                        |
-   | <---   publish lockout signal  ------  |  (when attempts > 3)
-   |                                        |
-   +-- enters INDEFINITE_LOCKED state
+VaultPadlock                               ControlComputer
+   |                                             |
+   | --- publish status,metrics,events,ble ----> |  Process MQTT packets
+   |                                             | 
+   | <-----------  publish ble data  ----------- |  
+   |                                             |
+   | <--------  publish lockout signal  -------  |  (when access attempts > 3)
+   |                                             |
+   +-------- enters INDEFINITE_LOCKED state
 ```
 ---
 
