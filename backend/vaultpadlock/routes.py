@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, Depends
-from auth.models.permissions import Scope
+from auth.models.permissions import VaultScopes
 from connection.database import get_db_conn
 from vaultpadlock.schemas import VaultPadlockEvents, VaultPadlockMetrics, VaultPadlockStatus, TopicEndpoints
 from vaultpadlock.repository import fetch_logs
@@ -10,9 +10,9 @@ from typing import List
 
 router = APIRouter()
 
-RequireStatusRead = Depends(require_scope(Scope.VAULT_STATUS_READ))
-RequireMetricsRead = Depends(require_scope(Scope.VAULT_METRICS_READ))
-RequireEventsRead = Depends(require_scope(Scope.VAULT_EVENTS_READ))
+RequireStatusRead = Depends(require_scope(VaultScopes.STATUS_READ))
+RequireMetricsRead = Depends(require_scope(VaultScopes.METRICS_READ))
+RequireEventsRead = Depends(require_scope(VaultScopes.EVENTS_READ))
 
 @router.get("/metrics", dependencies=[RequireMetricsRead], response_model=List[VaultPadlockMetrics])
 def get_metrics_logs(

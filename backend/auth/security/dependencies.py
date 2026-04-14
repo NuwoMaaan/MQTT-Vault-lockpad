@@ -3,15 +3,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from auth.security.jwt_handler import verify_token
 from auth.models.permissions import Scope
 
+
 security = HTTPBearer()
 
-# def require_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-#     token = credentials.credentials
-#     payload = verify_token(token)
-    
-#     return payload
-
-def require_scope(required_scope: Scope | str):
+def require_scope(required_scope: Scope):
     required_scope = str(required_scope)
 
     def dependency(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:

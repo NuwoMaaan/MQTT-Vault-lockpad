@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from auth.models.permissions import Scope
+from auth.models.permissions import BleScopes
 from connection.database import get_db_conn
 from ble.schemas import BleData
 from ble.repository import store_data, get_data
@@ -9,8 +9,8 @@ from auth.security.dependencies import require_scope
 COLLECTION = "BleData"
 router = APIRouter()
 
-RequireBleRead = Depends(require_scope(Scope.BLE_READ))
-RequireBleWrite = Depends(require_scope(Scope.BLE_WRITE))
+RequireBleRead = Depends(require_scope(BleScopes.READ))
+RequireBleWrite = Depends(require_scope(BleScopes.WRITE))
 
 @router.get("/data", dependencies=[RequireBleRead], response_model=BleData)
 def get_ble_data():

@@ -1,36 +1,67 @@
 import requests
+from requests.exceptions import HTTPError
+from http import HTTPStatus
 from auth.config import settings
 from auth.security.token_service import issue_service_token
+from auth.models.permissions import VaultScopes
+
 
 GRAFANA_URL = settings.GRAFANA_URL
 GRAFANA_DS_UID = settings.GRAFANA_DS_UID
 GRAFANA_USER = settings.GRAFANA_USER
 GRAFANA_PASSWORD = settings.GRAFANA_PASSWORD
 
-VAULT_METRICS_READ = "vault:metrics:read"
-VAULT_STATUS_READ = "vault:status:read"
-VAULT_EVENTS_READ = "vault:events:read"
-
 session = requests.Session()
 session.auth = (GRAFANA_USER, GRAFANA_PASSWORD)
 session.headers.update({"Content-Type": "application/json"})
 
+# Token id is required for deletion
+def get_service_account_token_id(id: int) -> int:
+    url = f"{GRAFANA_URL}/api/serviceaccounts/{id}/tokens"
+    r = session.get(url)
+    r.raise_for_status()
 
-def create_service_account() -> int:
+    return r.json()[0]['id']
+
+
+# Delete token to ensure only one exists
+def delete_service_account_token(sa_id: int, token_id: int) -> None:
+    url = f"{GRAFANA_URL}/api/serviceaccounts/{sa_id}/tokens/{token_id}"
+    r = session.delete(url)
+    r.raise_for_status()
+    print("Deleted existing service account token", r.status_code)
+
+
+def get_service_account_id(name: str, url: str) -> str | None:
+    url = f"{url}/search"
+    r = session.get(url)
+    r.raise_for_status()
+
+    for sa in r.json()['serviceAccounts']:
+        if sa['name'] == name:
+            return sa['id']
+    return None
+
+def create_service_account(name: str) -> tuple[int, bool]:
     url = f"{GRAFANA_URL}/api/serviceaccounts"
+    
+    # Check if service account already exists
+    existing_id = get_service_account_id(name, url)
+    if existing_id:
+        return existing_id, True
 
     print("Creating service account...")
     payload = {
-        "name": "admin_service_account",
+        "name": name,
         "role": "Admin",
         "isDisabled": False
-    }
+    } 
     r = session.post(url, json=payload)
     r.raise_for_status()
     data = r.json()
     print("Creating service account - complete")
 
-    return data['id']
+    return data['id'], False
 
 
 def create_service_account_token(id: int) -> str:
@@ -69,13 +100,24 @@ def configure_datasource(token):
 
 
 if __name__ == "__main__":
-    service_account_id = create_service_account()
+    service_account_id, service_account_exists = create_service_account("admin_service_account")
+    if service_account_exists:
+        token_id = get_service_account_token_id(service_account_id)
+        delete_service_account_token(service_account_id, token_id)
+
     grafana_token = create_service_account_token(service_account_id)
     session.auth = None
     session.headers.update({
         "Authorization": f"Bearer {grafana_token}"
     })
 
-    jwt_token = issue_service_token(service_name="GrafanaSA", scopes=[VAULT_METRICS_READ, VAULT_STATUS_READ, VAULT_EVENTS_READ])
+    jwt_token = issue_service_token(service_name="GrafanaSA",
+                                    scopes=[
+                                        VaultScopes.METRICS_READ,
+                                        VaultScopes.STATUS_READ,
+                                        VaultScopes.EVENTS_READ
+                                    ])
     configure_datasource(jwt_token)
     print("Complete - Grafana Infininty datasource authorization method configuration")
+
+
