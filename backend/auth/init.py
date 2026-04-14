@@ -7,6 +7,10 @@ GRAFANA_DS_UID = settings.GRAFANA_DS_UID
 GRAFANA_USER = settings.GRAFANA_USER
 GRAFANA_PASSWORD = settings.GRAFANA_PASSWORD
 
+VAULT_METRICS_READ = "vault:metrics:read"
+VAULT_STATUS_READ = "vault:status:read"
+VAULT_EVENTS_READ = "vault:events:read"
+
 session = requests.Session()
 session.auth = (GRAFANA_USER, GRAFANA_PASSWORD)
 session.headers.update({"Content-Type": "application/json"})
@@ -72,6 +76,6 @@ if __name__ == "__main__":
         "Authorization": f"Bearer {grafana_token}"
     })
 
-    api_token = issue_service_token(service_name="GrafanaSA")
-    configure_datasource(api_token)
-    print("Complete Grafana Infininty datasource authorization method configuration")
+    jwt_token = issue_service_token(service_name="GrafanaSA", scopes=[VAULT_METRICS_READ, VAULT_STATUS_READ, VAULT_EVENTS_READ])
+    configure_datasource(jwt_token)
+    print("Complete - Grafana Infininty datasource authorization method configuration")

@@ -61,7 +61,7 @@ def _transport_ble(ble_data: BleData, client, vault_id: str) -> None:
 
 def _get_ble_data(jwt: str) -> BleData| None:
     response = requests.get(
-        f"http://localhost:8000/api/ble/token",
+        f"http://localhost:8000/api/ble/data",
         headers={"Authorization": f"Bearer {jwt}"},
         timeout=10,
     )
@@ -74,7 +74,7 @@ def _get_ble_data(jwt: str) -> BleData| None:
 
 def _post_ble_data(payload: BleData, jwt: str) -> None:
     response = requests.post(
-        f"http://localhost:8000/api/ble/token",
+        f"http://localhost:8000/api/ble/data",
         headers={"Authorization": f"Bearer {jwt}"},
         json=payload.model_dump(mode="json"),
         timeout=10,
@@ -85,7 +85,7 @@ def _post_ble_data(payload: BleData, jwt: str) -> None:
 
 def _create_jwt_token(api_key: str) -> str:
     response = requests.post(
-        "http://localhost:8000/api/auth/token",
+        "http://localhost:8000/api/auth/ble/token", 
         headers={
             "X-API-Key": api_key,
             "X-Service-Name": "ControlComputerService"

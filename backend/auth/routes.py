@@ -4,10 +4,12 @@ from auth.security.token_service import issue_service_token
 from auth.security.auth_api import verify_api_key
 from auth.config import settings
 
+BLE_READ = "ble:read"
+BLE_WRITE = "ble:write"
 API_KEY = settings.API_KEY
 router = APIRouter()
 
-@router.post("/token", response_model=Token)
+@router.post("/ble/token", response_model=Token)
 def create_token(
     x_api_key: str = Header(..., alias="X-API-Key"),
     service: str = Header(..., alias="X-Service-Name")
@@ -18,5 +20,5 @@ def create_token(
             detail="Invalid API key"
         )
 
-    jwt_token = issue_service_token(service)
+    jwt_token = issue_service_token(service, scopes=[BLE_READ, BLE_WRITE])
     return Token(access_token=jwt_token)

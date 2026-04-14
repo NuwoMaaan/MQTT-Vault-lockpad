@@ -1,9 +1,9 @@
 from auth.security.jwt_handler import create_access_token
 
-def issue_service_token(service_name: str):
+def issue_service_token(service_name: str, scopes: list[str]) -> str:
     data = {
-        "service": service_name,
-        "role": "service"
+        "sub": service_name,
+        "token_type": "service",
+        "scope": scopes,
     }
-
     return create_access_token(data)

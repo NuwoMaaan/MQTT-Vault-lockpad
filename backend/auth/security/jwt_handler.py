@@ -10,11 +10,8 @@ ALGORITHM = settings.ALGORITHM
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    
-    # Long-lived token (service account)
     expire = datetime.now(UTC) + timedelta(days=EXPIRE)
     to_encode.update({"exp": expire})
-
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
