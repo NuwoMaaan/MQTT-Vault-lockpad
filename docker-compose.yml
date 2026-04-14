@@ -68,6 +68,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      grafana:
+        condition: service_started
     networks:
       - backend-network
       - database-network

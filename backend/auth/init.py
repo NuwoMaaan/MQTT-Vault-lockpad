@@ -1,6 +1,4 @@
 import requests
-from requests.exceptions import HTTPError
-from http import HTTPStatus
 from auth.config import settings
 from auth.security.token_service import issue_service_token
 from auth.models.permissions import VaultScopes
@@ -29,7 +27,7 @@ def delete_service_account_token(sa_id: int, token_id: int) -> None:
     url = f"{GRAFANA_URL}/api/serviceaccounts/{sa_id}/tokens/{token_id}"
     r = session.delete(url)
     r.raise_for_status()
-    print("Deleted existing service account token", r.status_code)
+    print("Deleted existing service account token")
 
 
 def get_service_account_id(name: str, url: str) -> str | None:
@@ -96,7 +94,7 @@ def configure_datasource(token):
 
     r = session.put(url, json=data)
     r.raise_for_status()
-    print("Grafana Datasource: Infinity bearer token updated", r.status_code)
+    print("Grafana Datasource: Infinity bearer token updated")
 
 
 if __name__ == "__main__":
