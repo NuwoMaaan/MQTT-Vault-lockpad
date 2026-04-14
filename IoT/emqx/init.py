@@ -1,13 +1,16 @@
 import requests
 import json
 import time
+import os
 from pathlib import Path
-from connection.config import settings
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 BASE_DIR = Path(__file__).parent
-BASE_URL = settings.EMQX_URL
-USER = settings.ADMIN_USER
-PASS = settings.ADMIN_PASS
+BASE_URL = os.getenv("EMQX_URL")
+USER = os.getenv("ADMIN_USER")
+PASS = os.getenv("ADMIN_PASS")
 
 session = requests.Session()
 

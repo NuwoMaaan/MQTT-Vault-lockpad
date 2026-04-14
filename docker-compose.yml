@@ -23,6 +23,16 @@ services:
       - emqx_log:/opt/emqx/log
     networks:
       - database-network
+      - emqx-network
+
+  emqx-init:
+    build:
+      context: ./IoT/emqx 
+    depends_on:
+      emqx:
+        condition: service_healthy
+    networks:
+      - emqx-network
   
   mongo:
     image: mongo:7
@@ -75,11 +85,12 @@ services:
       - database-network
 
     
-
 networks:
   database-network:
     driver: bridge
   backend-network:
+    driver: bridge
+  emqx-network:
     driver: bridge
 
 volumes:

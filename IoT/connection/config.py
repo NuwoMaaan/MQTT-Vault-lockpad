@@ -9,10 +9,6 @@ class Settings(BaseSettings):
     MQTT_USERNAME: str 
     MQTT_PASSWORD: str
 
-    EMQX_URL: str
-    ADMIN_USER: str
-    ADMIN_PASS: str
-
     API_KEY: str
 
 settings = Settings()
