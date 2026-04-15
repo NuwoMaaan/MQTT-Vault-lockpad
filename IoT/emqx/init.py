@@ -16,17 +16,57 @@ session = requests.Session()
 
 def post(path, payload):
     print(f"Configuring {path}...")
-    
     url = f"{BASE_URL}/{path}"
+
     try:
         response = session.post(url, json=payload, timeout=10)
-        
+        # Success
         if response.status_code in (200, 201, 204):
             print(f"Successfully configured {path}")
+            return
+        # Handle "already exists"
+        if response.status_code in (400, 409):
+            try:
+                err = response.json()
+                code = err.get("code", "")
+                msg = err.get("message", "")
+            except ValueError:
+                code = ""
+                msg = ""
+            if code == "ALREADY_EXISTS":
+                print(f"{msg}. Continuing...")
+                return
+
+        print(f"Error on {path}: {response.status_code} - {response.text}")
+        response.raise_for_status()
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed for {path}: {e}")
+        raise
+
+def post_rules(path, payload):
+    print(f"Configuring {path}...")
+    url = f"{BASE_URL}/{path}"
+
+    try:
+        response = session.get(url, timeout=10)
+        response.raise_for_status()
+        existing_rules = response.json().get("data", [])
+        existing_names = {rule["name"] for rule in existing_rules}
+
+        if payload["name"] in existing_names:
+            print(f"Rule '{payload['name']}' already exists. Continuing...")
+            return
+
+        # Create new rule
+        response = session.post(url, json=payload, timeout=10)
+        if response.status_code in (200, 201, 204):
+            print(f"Successfully configured {path}")
+            return
         else:
             print(f"Error on {path}: {response.status_code} - {response.text}")
             response.raise_for_status()
-            
+
     except requests.exceptions.RequestException as e:
         print(f"Request failed for {path}: {e}")
         raise
@@ -70,7 +110,7 @@ if __name__ == "__main__":
     try:
         login()
 
-        provisioning_steps = [
+        provisioning_steps_1 = [
             ("authentication", "provisioning/auth.json"),
             ("authentication/password_based:built_in_database/users", "provisioning/device-user.json"),
             
@@ -79,21 +119,23 @@ if __name__ == "__main__":
             ("actions", "provisioning/action-metrics.json"),
             ("actions", "provisioning/action-event.json"),
             ("actions", "provisioning/action-status.json"),
-
+        ]
+        
+        # 'rules' don't follow existing post pattern, so handle separately to check for existing rules and avoid duplicates
+        provisioning_steps_2 = [
             ("rules", "provisioning/rule-metrics.json"),
             ("rules", "provisioning/rule-event.json"),
             ("rules", "provisioning/rule-status.json"),
         ]
 
-        for endpoint, file_path in provisioning_steps:
+        for endpoint, file_path in provisioning_steps_1:
             payload = load(file_path)
             post(endpoint, payload)
+        
+        for endpoint, file_path in provisioning_steps_2:
+            payload = load(file_path)
+            post_rules(endpoint, payload)
 
         print(f"\nEMQX provisioning complete.")
-        print("Tasks configurations complete:")
-        print(" - Auth method & user client")
-        print(" - MongoDB connector established")
-        print(" - Actions setup")
-        print(" - Rules setup")
     finally:
         session.close()
