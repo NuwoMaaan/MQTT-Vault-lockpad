@@ -67,30 +67,33 @@ def load(p):
         return data
 
 if __name__ == "__main__":
-    login()
+    try:
+        login()
 
-    provisioning_steps = [
-        ("authentication", "provisioning/auth.json"),
-        ("authentication/password_based:built_in_database/users", "provisioning/device-user.json"),
-        
-        ("connectors", "provisioning/mongo-connector.json"),
+        provisioning_steps = [
+            ("authentication", "provisioning/auth.json"),
+            ("authentication/password_based:built_in_database/users", "provisioning/device-user.json"),
+            
+            ("connectors", "provisioning/mongo-connector.json"),
 
-        ("actions", "provisioning/action-metrics.json"),
-        ("actions", "provisioning/action-event.json"),
-        ("actions", "provisioning/action-status.json"),
+            ("actions", "provisioning/action-metrics.json"),
+            ("actions", "provisioning/action-event.json"),
+            ("actions", "provisioning/action-status.json"),
 
-        ("rules", "provisioning/rule-metrics.json"),
-        ("rules", "provisioning/rule-event.json"),
-        ("rules", "provisioning/rule-status.json"),
-    ]
+            ("rules", "provisioning/rule-metrics.json"),
+            ("rules", "provisioning/rule-event.json"),
+            ("rules", "provisioning/rule-status.json"),
+        ]
 
-    for endpoint, file_path in provisioning_steps:
-        payload = load(file_path)
-        post(endpoint, payload)
+        for endpoint, file_path in provisioning_steps:
+            payload = load(file_path)
+            post(endpoint, payload)
 
-    print(f"\nEMQX provisioning complete.")
-    print("Tasks configurations complete:")
-    print(" - Auth method & user client")
-    print(" - MongoDB connector established")
-    print(" - Actions setup")
-    print(" - Rules setup")
+        print(f"\nEMQX provisioning complete.")
+        print("Tasks configurations complete:")
+        print(" - Auth method & user client")
+        print(" - MongoDB connector established")
+        print(" - Actions setup")
+        print(" - Rules setup")
+    finally:
+        session.close()

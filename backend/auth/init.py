@@ -98,24 +98,27 @@ def configure_datasource(token):
 
 
 if __name__ == "__main__":
-    service_account_id, service_account_exists = create_service_account("admin_service_account")
-    if service_account_exists:
-        token_id = get_service_account_token_id(service_account_id)
-        delete_service_account_token(service_account_id, token_id)
+    try:
+        service_account_id, service_account_exists = create_service_account("admin_service_account")
+        if service_account_exists:
+            token_id = get_service_account_token_id(service_account_id)
+            delete_service_account_token(service_account_id, token_id)
 
-    grafana_token = create_service_account_token(service_account_id)
-    session.auth = None
-    session.headers.update({
-        "Authorization": f"Bearer {grafana_token}"
-    })
+        grafana_token = create_service_account_token(service_account_id)
+        session.auth = None
+        session.headers.update({
+            "Authorization": f"Bearer {grafana_token}"
+        })
 
-    jwt_token = issue_service_token(service_name="GrafanaSA",
-                                    scopes=[
-                                        VaultScopes.METRICS_READ,
-                                        VaultScopes.STATUS_READ,
-                                        VaultScopes.EVENTS_READ
-                                    ])
-    configure_datasource(jwt_token)
-    print("Complete - Grafana Infininty datasource authorization method configuration")
+        jwt_token = issue_service_token(service_name="GrafanaSA",
+                                        scopes=[
+                                            VaultScopes.METRICS_READ,
+                                            VaultScopes.STATUS_READ,
+                                            VaultScopes.EVENTS_READ
+                                        ])
+        configure_datasource(jwt_token)
+        print("Complete - Grafana Infininty datasource authorization method configuration")
+    finally:
+        session.close()
 
 
