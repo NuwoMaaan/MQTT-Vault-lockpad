@@ -68,19 +68,10 @@ VaultPadlock                               ControlComputer
    ```
 1. **Docker compose deployment:**
    ```
-   docker compose up (Deploys EMQX, Backend, MongoDB, Grafana)
+   docker compose up
+   (Deploys EMQX, Backend, MongoDB, Grafana & runs init scripts)
    ```
-2. **Init automation (Ensure EMQX, Backend & Grafana containers are healthy):**
-   ```
-   MQTT Lockpad\IoT
-   uv run -m emqx.init
-
-   MQTT Lockpad\Backend
-   uv run -m auth.init
-   
-   (Note: These script does not need to be run again unless rebuilding containers or you have deleted EMQX & Grafana container volumes)
-   ```
-3. **LightBlue app setup**
+2. **LightBlue app setup**
    ```
    https://punchthrough.com/lightblue
    Install application and create a virtual device and follow below instructions:
@@ -89,7 +80,7 @@ VaultPadlock                               ControlComputer
    - Enable permissions: 'read', 'Write', 'Write without Response' for Characteristic
    - Finally, insert respective UUIDs into .env file in /BLE directory
    ```
-4. **IoT devices (execute each in new terminal):**
+3. **IoT devices (execute each in new terminal):**
    ```
    MQTT Lockpad\IoT
    uv run -m app.VaultPadlock (activate LightBlue virtual device too)
@@ -98,7 +89,7 @@ VaultPadlock                               ControlComputer
 
    (Note: Once BLE device is registered, authentication would only be possible with this device unless manually removed from MongoDB. Program's flow will adjust to new registration or if BLE data exists accordingly)
    ```
-5. **View EMQX dashboard, MongoDB, Grafana:**
+4. **View EMQX dashboard, MongoDB, Grafana:**
    ```
    - default credentials for all logins (username: 'admin', password: 'password')
    
