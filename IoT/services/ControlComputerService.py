@@ -93,5 +93,6 @@ def _create_jwt_token(api_key: str) -> str:
         timeout=10,
     )
     response.raise_for_status()
-    return response.json().get("access_token")
+    response_data = response.json()
+    return response_data['access_token']['token']
 

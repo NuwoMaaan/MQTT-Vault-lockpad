@@ -21,7 +21,7 @@ def create_token(
             detail="Invalid API key"
         )
 
-    token_response: TokenResponse = issue_service_token(service, scopes=[BleScopes.READ, BleScopes.WRITE])
+    token_response = issue_service_token(service, scopes=[BleScopes.READ, BleScopes.WRITE])
     
     return Token(
         access_token=AccessToken(

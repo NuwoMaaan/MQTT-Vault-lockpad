@@ -110,13 +110,13 @@ if __name__ == "__main__":
             "Authorization": f"Bearer {grafana_token}"
         })
 
-        jwt_token = issue_service_token(service_name="GrafanaSA",
+        token_response = issue_service_token(service_name="GrafanaSA",
                                         scopes=[
                                             VaultScopes.METRICS_READ,
                                             VaultScopes.STATUS_READ,
                                             VaultScopes.EVENTS_READ
                                         ])
-        configure_datasource(jwt_token)
+        configure_datasource(token_response.access_token)
         print("Complete - Grafana Infininty datasource authorization method configuration")
     finally:
         session.close()

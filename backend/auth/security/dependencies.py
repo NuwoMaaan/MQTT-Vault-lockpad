@@ -33,7 +33,6 @@ def require_scope(required_scope: Scope):
     return dependency
 
 def require_refresh_token(x_refresh_token: str = Header(..., alias="X-Refresh-Token")) -> dict:
-    """Dependency to validate and extract refresh token from headers."""
     payload = verify_token(x_refresh_token)
     
     token_type = payload.get("token_type")
