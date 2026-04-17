@@ -59,7 +59,7 @@ def _transport_ble(ble_data: BleData, client, vault_id: str) -> None:
     client.publish(topic, ble_data_json)
 
 
-def _get_ble_data(jwt: str) -> BleData| None:
+def _get_ble_data(jwt: str) -> BleData | None:
     response = requests.get(
         f"http://localhost:8000/api/ble/data",
         headers={"Authorization": f"Bearer {jwt}"},
