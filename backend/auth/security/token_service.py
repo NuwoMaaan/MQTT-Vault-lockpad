@@ -1,9 +1,22 @@
-from auth.security.jwt_handler import create_access_token
+from auth.security.jwt_handler import create_access_token, create_refresh_token
+from auth.config import settings
+from auth.models.token_response import TokenResponse
 
-def issue_service_token(service_name: str, scopes: list[str]) -> str:
+def issue_service_token(service_name: str, scopes: list[str]) -> TokenResponse:
     data = {
         "sub": service_name,
         "token_type": "service",
         "scope": scopes,
     }
-    return create_access_token(data)
+    access_token = create_access_token(data)
+    refresh_token = create_refresh_token(data)
+    
+    access_expires_in = settings.EXPIRE * 24 * 60 * 60
+    refresh_expires_in = settings.REFRESH_EXPIRE * 24 * 60 * 60
+    
+    return TokenResponse(
+        access_token=access_token,
+        access_token_expires_in=access_expires_in,
+        refresh_token=refresh_token,
+        refresh_token_expires_in=refresh_expires_in,
+    )
