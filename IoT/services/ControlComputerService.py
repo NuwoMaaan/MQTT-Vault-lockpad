@@ -39,7 +39,7 @@ class ControlComputerService:
     
     @classmethod
     def _token_refresh_loop(cls) -> None:
-        REFRESH_BUFFER = 300  # Refresh 5 minutes before expiry
+        REFRESH_BUFFER = 10  # Refresh 5 minutes before expiry (300)
         
         while not cls._stop_refresh.is_set():
             try:
@@ -98,11 +98,12 @@ class ControlComputerService:
             return
         
         try:
-            if cls.refresh_jwt and not _is_token_expired(cls.token_expires_at):
-                # Refresh token exists and is valid, use it
+            if cls.refresh_jwt and _is_token_expired(cls.token_expires_at):
                 cls.jwt, cls.refresh_jwt, cls.token_expires_at = _refresh_token(cls.refresh_jwt)
+                print("######### Refreshed JWT token")
             else:
                 cls.jwt, cls.refresh_jwt, cls.token_expires_at = _create_jwt_token(settings.API_KEY)
+                print("######### Obtained new JWT token")
         except Exception as e:
             print(f"Failed to ensure valid token: {e}")
             raise
@@ -175,4 +176,5 @@ def _refresh_token(refresh_jwt_token: str) -> tuple[str, str, float]:
 def _is_token_expired(token_expires_at: float | None) -> bool:
     if not token_expires_at:
         return True
-    return time.time() > (token_expires_at - 300)  # 5 min buffer
+    return time.time() > (token_expires_at - 10)  #300
+    

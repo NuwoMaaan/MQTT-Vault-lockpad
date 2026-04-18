@@ -12,7 +12,7 @@ ALGORITHM = settings.ALGORITHM
 def create_access_token(data: dict):
     to_encode = data.copy()
     to_encode["token_type"] = "service"
-    expire = datetime.now(UTC) + timedelta(days=EXPIRE)
+    expire = datetime.now(UTC) + timedelta(seconds=EXPIRE)
     to_encode.update({"exp": expire})
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return token
@@ -20,7 +20,7 @@ def create_access_token(data: dict):
 def create_refresh_token(data: dict):
     to_encode = data.copy()
     to_encode["token_type"] = "refresh"
-    expire = datetime.now(UTC) + timedelta(days=REFRESH_EXPIRE)
+    expire = datetime.now(UTC) + timedelta(seconds=REFRESH_EXPIRE)
     to_encode.update({"exp": expire})
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return token
@@ -35,3 +35,4 @@ def verify_token(token: str):
 
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
