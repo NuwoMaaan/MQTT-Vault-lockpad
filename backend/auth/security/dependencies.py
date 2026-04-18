@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from auth.security.jwt_handler import verify_token
 from auth.models.permissions import Scope
+import secrets
 
 
 security = HTTPBearer()
@@ -43,3 +44,6 @@ def require_refresh_token(x_refresh_token: str = Header(..., alias="X-Refresh-To
         )
     
     return payload
+
+def verify_api_key(api_key: str, API_KEY: str) -> bool:
+    return secrets.compare_digest(api_key, API_KEY)

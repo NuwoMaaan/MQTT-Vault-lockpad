@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Header, Depends
 from auth.models.token import Token
 from auth.security.token_service import token, issue_service_token
-from auth.security.dependencies import require_refresh_token
-from auth.security.auth_api import verify_api_key
+from auth.security.dependencies import require_refresh_token, verify_api_key
 from auth.config import settings
 from auth.models.permissions import BleScopes
 

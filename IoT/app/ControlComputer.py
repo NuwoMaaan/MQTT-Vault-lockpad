@@ -34,6 +34,7 @@ class MQTTControlComputerApp(MQTTApp):
 
 def main():
     app = MQTTControlComputerApp(id="control_device_01")
+    ControlComputerService.start_token_refresh_loop()
     app.run(ble_proc=None)
 
     
