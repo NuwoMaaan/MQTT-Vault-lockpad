@@ -29,39 +29,6 @@ class ControlComputerService:
             publish_lockout(client, data, lock_id)
     
     @classmethod
-    def start_token_refresh_loop(cls) -> None:
-        if cls._refresh_thread and cls._refresh_thread.is_alive():
-            return
-        
-        cls._stop_refresh.clear()
-        cls._refresh_thread = threading.Thread(target=cls._token_refresh_loop, daemon=True)
-        cls._refresh_thread.start()
-    
-    @classmethod
-    def _token_refresh_loop(cls) -> None:
-        REFRESH_BUFFER = 10  # Refresh 5 minutes before expiry (300)
-        
-        while not cls._stop_refresh.is_set():
-            try:
-                if cls.token_expires_at is None:
-                    cls._stop_refresh.wait(timeout=5)
-                    continue
-                
-                time_until_expiry = cls.token_expires_at - time.time()
-                
-                if time_until_expiry <= REFRESH_BUFFER:
-                    cls._ensure_valid_token()
-                    time_until_expiry = cls.token_expires_at - time.time()
-                
-                # Sleep until next refresh is needed (e.g. 5 min before expiry)
-                sleep_time = max(1, time_until_expiry - REFRESH_BUFFER)
-                cls._stop_refresh.wait(timeout=sleep_time)
-                
-            except Exception as e:
-                print(f"Token refresh loop error: {e}")
-                cls._stop_refresh.wait(timeout=30)
-
-    @classmethod
     def ble_data_handler(cls, msg, client) -> None:
         if msg.topic != Topics.ble:
             return
@@ -93,6 +60,39 @@ class ControlComputerService:
             pass
 
     @classmethod
+    def start_token_refresh_loop(cls) -> None:
+        if cls._refresh_thread and cls._refresh_thread.is_alive():
+            return
+        
+        cls._stop_refresh.clear()
+        cls._refresh_thread = threading.Thread(target=cls._token_refresh_loop, daemon=True)
+        cls._refresh_thread.start()
+
+    @classmethod
+    def _token_refresh_loop(cls) -> None:
+        REFRESH_BUFFER = 300  # Refresh 5 minutes before expiry (300)
+        
+        while not cls._stop_refresh.is_set():
+            try:
+                if cls.token_expires_at is None:
+                    cls._stop_refresh.wait(timeout=5)
+                    continue
+                
+                time_until_expiry = cls.token_expires_at - time.time()
+                
+                if time_until_expiry <= REFRESH_BUFFER:
+                    cls._ensure_valid_token()
+                    time_until_expiry = cls.token_expires_at - time.time()
+                
+                # Sleep until next refresh is needed
+                sleep_time = max(1, time_until_expiry - REFRESH_BUFFER)
+                cls._stop_refresh.wait(timeout=sleep_time)
+                
+            except Exception as e:
+                print(f"Token refresh loop error: {e}")
+                cls._stop_refresh.wait(timeout=30)
+
+    @classmethod
     def _ensure_valid_token(cls) -> None:
         if cls.jwt and not _is_token_expired(cls.token_expires_at):
             return
@@ -100,10 +100,8 @@ class ControlComputerService:
         try:
             if cls.refresh_jwt and _is_token_expired(cls.token_expires_at):
                 cls.jwt, cls.refresh_jwt, cls.token_expires_at = _refresh_token(cls.refresh_jwt)
-                print("######### Refreshed JWT token")
             else:
                 cls.jwt, cls.refresh_jwt, cls.token_expires_at = _create_jwt_token(settings.API_KEY)
-                print("######### Obtained new JWT token")
         except Exception as e:
             print(f"Failed to ensure valid token: {e}")
             raise
@@ -158,7 +156,6 @@ def _create_jwt_token(api_key: str) -> tuple[str, str, float]:
 
 
 def _refresh_token(refresh_jwt_token: str) -> tuple[str, str, float]:
-    """Refresh using existing refresh token"""
     response = requests.post(
         "http://localhost:8000/api/auth/token/refresh",
         headers={"X-Refresh-Token": refresh_jwt_token},
@@ -176,5 +173,5 @@ def _refresh_token(refresh_jwt_token: str) -> tuple[str, str, float]:
 def _is_token_expired(token_expires_at: float | None) -> bool:
     if not token_expires_at:
         return True
-    return time.time() > (token_expires_at - 10)  #300
+    return time.time() > (token_expires_at - 300)  #300
     
