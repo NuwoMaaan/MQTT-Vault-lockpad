@@ -8,6 +8,7 @@ class Settings(BaseSettings):
 
     JWT_SECRET_KEY: str
     EXPIRE: int
+    REFRESH_EXPIRE: int
     ALGORITHM: str = "HS256"
 
     GRAFANA_URL: str

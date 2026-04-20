@@ -1,7 +1,9 @@
+import time
 import requests
 from auth.config import settings
 from auth.security.token_service import issue_service_token
 from auth.models.permissions import VaultScopes
+from auth.grafana.service import GrafanaTokenRefreshService
 
 
 GRAFANA_URL = settings.GRAFANA_URL
@@ -96,8 +98,7 @@ def configure_datasource(token):
     r.raise_for_status()
     print("Grafana Datasource: Infinity bearer token updated")
 
-
-if __name__ == "__main__":
+def init():
     try:
         service_account_id, service_account_exists = create_service_account("admin_service_account")
         if service_account_exists:
@@ -110,15 +111,26 @@ if __name__ == "__main__":
             "Authorization": f"Bearer {grafana_token}"
         })
 
-        jwt_token = issue_service_token(service_name="GrafanaSA",
+        token_response = issue_service_token(service_name="GrafanaSA",
                                         scopes=[
                                             VaultScopes.METRICS_READ,
                                             VaultScopes.STATUS_READ,
                                             VaultScopes.EVENTS_READ
                                         ])
-        configure_datasource(jwt_token)
+        configure_datasource(token_response.access_token)
         print("Complete - Grafana Infininty datasource authorization method configuration")
+
+        GrafanaTokenRefreshService.jwt = token_response.access_token
+        GrafanaTokenRefreshService.refresh_jwt = token_response.refresh_token
+        GrafanaTokenRefreshService.token_expires_at = time.time() + token_response.access_token_expires_in
+        GrafanaTokenRefreshService.grafana_token = grafana_token
+
     finally:
         session.close()
+
+if __name__ == "__main__":
+    init()
+
+    
 
 

@@ -111,16 +111,18 @@ MQTT Lockpad/
 │   ├── app/           # Main application modules (VaultPadlock, ControlComputer, MonitorApp)
 │   ├── connection/    # MQTT broker connection configuration
 │   ├── data/          # Data generators for padlock and control messages
-│   ├── emqx/          # Provisioning configurations & init automation
 │   ├── lock/          # Indefinite lock detection & enforcement logic
 │   ├── schemas/       # Pydantic models for data validation
 │   ├── services/      # MonitorApp, ControlComputer & VaultPadlock service classes
 │   └── utils/         # Helper modules (console output, lockout detection, signal handling)
 │
+├── emqx/          # Provisioning configurations & init automation
+│   └── provisioning/
+|
 ├── backend/           # FastAPI backend
 |   ├── auth/          # Route authentication & creation for jwt
 │   ├── connection/    # MongoDB Connection
-│   └── vaultpadlock/  # Routes, schema & repository for vault padlock
+│   ├── vaultpadlock/  # Routes, schema & repository for vault padlock
 │   └── ble/           # Route, schema & repository for ble data
 │
 └── grafana/           # Store provisioning config & JSON files

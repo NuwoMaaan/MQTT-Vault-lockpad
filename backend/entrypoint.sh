@@ -3,6 +3,6 @@ set -e
 
 cd /app/backend
 
-uv run -m auth.init
+# uv run -m auth.grafana.init
 
 exec "$@"

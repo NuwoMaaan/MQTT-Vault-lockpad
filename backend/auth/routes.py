@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Header, Depends
 from auth.models.token import Token
-from auth.security.token_service import issue_service_token
-from auth.security.auth_api import verify_api_key
+from auth.security.token_service import token, issue_service_token
+from auth.security.dependencies import require_refresh_token, verify_api_key
 from auth.config import settings
 from auth.models.permissions import BleScopes
 
@@ -19,5 +19,13 @@ def create_token(
             detail="Invalid API key"
         )
 
-    jwt_token = issue_service_token(service, scopes=[BleScopes.READ, BleScopes.WRITE])
-    return Token(access_token=jwt_token)
+    token_response = issue_service_token(service, scopes=[BleScopes.READ, BleScopes.WRITE])
+    return token(token_response)
+
+@router.post("/token/refresh", response_model=Token)
+def refresh_token(payload: dict = Depends(require_refresh_token)):
+    service_name = payload.get("sub")
+    scopes = payload.get("scope", [])
+    
+    token_response = issue_service_token(service_name, scopes=scopes)
+    return token(token_response)
