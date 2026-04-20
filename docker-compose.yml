@@ -27,7 +27,7 @@ services:
 
   emqx-init:
     build:
-      context: ./IoT/emqx 
+      context: ./emqx 
     depends_on:
       emqx:
         condition: service_healthy
