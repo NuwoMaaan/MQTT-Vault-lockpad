@@ -1,0 +1,101 @@
+import threading
+import time
+import requests
+from connection.config import settings
+
+
+class TokenManager:
+    def __init__(self):
+        self.jwt: str | None = None
+        self.refresh_jwt: str | None = None
+        self.token_expires_at: float | None = None
+        self._refresh_thread: threading.Thread | None = None
+        self._stop_refresh: threading.Event = threading.Event()
+
+
+    def get_token(self) -> str:
+        if not self.jwt or self._is_token_expired():
+            self._ensure_valid_token()
+        return self.jwt
+       
+
+    def start_token_refresh_loop(self) -> None:
+        if self._refresh_thread and self._refresh_thread.is_alive():
+            return
+        
+        self._stop_refresh.clear()
+        self._refresh_thread = threading.Thread(target=self._token_refresh_loop, daemon=True)
+        self._refresh_thread.start()
+
+     
+    def _token_refresh_loop(self) -> None:
+        REFRESH_BUFFER = 300  # Refresh 5 minutes before expiry (300)
+        
+        while not self._stop_refresh.is_set():
+            try:
+                if self.token_expires_at is None:
+                    self._stop_refresh.wait(timeout=5)
+                    continue
+                
+                time_until_expiry = self.token_expires_at - time.time()
+                
+                if time_until_expiry <= REFRESH_BUFFER:
+                    self._ensure_valid_token()
+                    time_until_expiry = self.token_expires_at - time.time()
+                
+                # Sleep until next refresh is needed
+                sleep_time = max(1, time_until_expiry - REFRESH_BUFFER)
+                self._stop_refresh.wait(timeout=sleep_time)
+                
+            except Exception as e:
+                print(f"Token refresh loop error: {e}")
+                self._stop_refresh.wait(timeout=30)
+       
+
+    def _ensure_valid_token(self) -> None:
+        if self.jwt and not self._is_token_expired(self.token_expires_at):
+            return
+        
+        try:
+            if self.refresh_jwt and self._is_token_expired(self.token_expires_at):
+                self.jwt, self.refresh_jwt, self.token_expires_at = self._refresh_token(self.refresh_jwt)
+            else:
+                self.jwt, self.refresh_jwt, self.token_expires_at = self._create_jwt_token(settings.API_KEY)
+        except Exception as e:
+            print(f"Failed to ensure valid token: {e}")
+            raise
+    
+
+    def _request_token(self, url: str, headers: dict) -> tuple[str, str, float]:
+        response = requests.post(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        jwt_token = data["access_token"]["token"]
+        refresh_jwt_token = data["refresh_token"]["token"]
+        token_expires_at = time.time() + data["access_token"]["expires_in"]
+
+        return jwt_token, refresh_jwt_token, token_expires_at
+
+
+    def _is_token_expired(self, token_expires_at: float | None) -> bool:
+        if not token_expires_at:
+            return True
+        return time.time() > (token_expires_at - 300)  #300
+
+
+    def _create_jwt_token(self, api_key: str) -> tuple[str, str, float]:
+        return self._request_token(
+            url="http://localhost:8000/api/auth/ble/token",
+            headers={
+                "X-API-Key": api_key,
+                "X-Service-Name": "ControlComputerService"
+            }
+        )
+
+
+    def _refresh_token(self, refresh_jwt_token: str) -> tuple[str, str, float]:
+        return self._request_token(
+            url="http://localhost:8000/api/auth/token/refresh",
+            headers={"X-Refresh-Token": refresh_jwt_token}
+        )
