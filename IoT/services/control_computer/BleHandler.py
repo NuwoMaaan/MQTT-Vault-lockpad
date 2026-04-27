@@ -7,8 +7,8 @@ from schemas.models import BleData, BleDataRequest
 from schemas.constants import Topics
 
 if TYPE_CHECKING:
-    from services.TokenManager import TokenManager
-    from services import BleApiClient
+    from services.control_computer.TokenManager import TokenManager
+    from services.control_computer import BleApiClient
     
 
 class BleHandler:

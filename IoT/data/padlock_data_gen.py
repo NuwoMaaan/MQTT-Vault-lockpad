@@ -7,7 +7,6 @@ from pydantic import ValidationError
 
 class PadlockDataGenerator():
     def __init__(self, id: str):
-        self.device_id = id
         self.status_data = StatusData(id)
         self.metric_data = MetricData(id)
         self.event_data = EventData(id)

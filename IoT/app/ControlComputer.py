@@ -3,7 +3,7 @@ from data.control_data_gen import ControlDataGenerator
 from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
 from app.MqttApp import MQTTApp
-from services.ControlComputerService import ControlComputerService
+from services.control_computer.ControlComputerService import ControlComputerService
 
 
 class MQTTControlComputerApp(MQTTApp):

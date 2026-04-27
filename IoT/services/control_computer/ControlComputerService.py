@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from services.TokenManager import TokenManager
-from services.BleApiClient import BleApiClient
-from services.BleHandler import BleHandler
+from services.control_computer.TokenManager import TokenManager
+from services.control_computer.BleApiClient import BleApiClient
+from services.control_computer.BleHandler import BleHandler
 from lock.lockout import publish_lockout, detection_login_attempts
-
 
 if TYPE_CHECKING:
     from data.control_data_gen import LockData
 
 
 class ControlComputerService:
-    def __init__(self, ):
+    def __init__(self):
         self.token_manager = TokenManager()
         self.api_client = BleApiClient()
         self.ble_handler = BleHandler(self.token_manager, self.api_client)
