@@ -1,22 +1,16 @@
 from paho.mqtt import client as mqtt_client
 from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
-from services.VaultPadlockService import VaultPadlockService
-from data.padlock_data_gen import PadlockDataGenerator
+from services.vault_padlock.VaultPadlockService import VaultPadlockService
 from app.MqttApp import MQTTApp
-from app.ble_device import BLEDevice
 import time
-
 
 
 class MQTTPadlockApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
+        self.service = VaultPadlockService(id)
         self.passcode = '000'
-        self.data = PadlockDataGenerator(id)
-        self.ble_device = BLEDevice()
-        self.ble_present = False
-        self.ble_proc = None
         self.host_topic = f"vault/padlock/{id}"
 
 
@@ -24,8 +18,8 @@ class MQTTPadlockApp(MQTTApp):
         try:
             while not shutdown_flag.is_set():
                 # Generate padlock data
-                padlock_status_data = self.data.generate_status_data()
-                padlock_metric_data = self.data.generate_metric_data()
+                padlock_status_data = self.service.app_data.generate_status_data()
+                padlock_metric_data = self.service.app_data.generate_metric_data()
 
                 if padlock_status_data is not None:
                     client.publish(Topics.status, padlock_status_data)
@@ -39,7 +33,7 @@ class MQTTPadlockApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"\nReceived `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
-            VaultPadlockService.lock_mechanism(msg, self.host_topic, self.data.status_data)
+            self.service.lock_mechanism(msg, self.host_topic, self.service.app_data.status_data)
                 
         client.subscribe(Topics.control)
         client.subscribe(self.host_topic)
@@ -48,10 +42,10 @@ class MQTTPadlockApp(MQTTApp):
             
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
-    VaultPadlockService.retrieve_ble_data(app)
-    VaultPadlockService.BLE(app)
-    VaultPadlockService.cli_access(app)
-    app.run(app.ble_proc)
+    app.service.retrieve_ble_data(app.client, app.host_topic)
+    app.service.start_ble(app.client)
+    app.service.cli_access(app.client, app.passcode)
+    app.run(app.service.ble_device.ble_proc)
 
 if __name__ == '__main__':
     main()

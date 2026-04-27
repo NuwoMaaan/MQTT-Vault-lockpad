@@ -1,5 +1,4 @@
-
-from schemas.models import BleData, ControlComputerLock
+from schemas.models import ControlComputerLock
 from pydantic import ValidationError
 from schemas.padlock_enums import LockState
 from datetime import datetime, timezone

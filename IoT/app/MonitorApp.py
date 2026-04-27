@@ -64,7 +64,6 @@ if __name__ == '__main__':
 
     app = MonitorApp(id="MQTT CLI Monitor Application")
     ascii_art()
-    print(Topics.metrics)
     app.main_loop()
     
 

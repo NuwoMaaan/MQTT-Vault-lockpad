@@ -3,13 +3,14 @@ from data.control_data_gen import ControlDataGenerator
 from schemas.constants import Topics
 from utils.signal_utils import shutdown_flag
 from app.MqttApp import MQTTApp
-from services.ControlComputerService import ControlComputerService
+from services.control_computer.ControlComputerService import ControlComputerService
 
 
 class MQTTControlComputerApp(MQTTApp):
     def __init__(self, id: str):
         super().__init__(id)
         self.data = ControlDataGenerator(id)
+        self.service = ControlComputerService()
         
     def publish(self, client: mqtt_client): 
         try:
@@ -22,8 +23,8 @@ class MQTTControlComputerApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"Received: {msg.payload.decode()}\n\r from {msg.topic}\n\r")
-            ControlComputerService.detection_mechanism(msg, client, self.data.lock_data, self.id)
-            ControlComputerService.ble_data_handler(msg, client)
+            self.service.detection_mechanism(msg, client, self.data.lock_data, self.id)
+            self.service.ble_data_handler(msg, client)
 
         client.subscribe(Topics.status)                              
         client.subscribe(Topics.metrics)
@@ -34,8 +35,8 @@ class MQTTControlComputerApp(MQTTApp):
 
 def main():
     app = MQTTControlComputerApp(id="control_device_01")
-    ControlComputerService.start_token_refresh_loop()
-    app.run(ble_proc=None)
+    app.service.start_jwt_refresh_loop()
+    app.run()
 
     
 
