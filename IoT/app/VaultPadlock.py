@@ -33,7 +33,7 @@ class MQTTPadlockApp(MQTTApp):
     def subscribe(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             print(f"\nReceived `{msg.payload.decode()}`\n\r from `{msg.topic}` topic\n\r")
-            self.service.lock_mechanism(msg, self.host_topic, self.service.data.status_data)
+            self.service.lock_mechanism(msg, self.host_topic, self.service.app_data.status_data)
                 
         client.subscribe(Topics.control)
         client.subscribe(self.host_topic)
@@ -43,7 +43,7 @@ class MQTTPadlockApp(MQTTApp):
 def main():
     app = MQTTPadlockApp(id="vault_lock_01")
     app.service.retrieve_ble_data(app.client, app.host_topic)
-    app.service.start_ble()
+    app.service.start_ble(app.client)
     app.service.cli_access(app.client, app.passcode)
     app.run(app.service.ble_device.ble_proc)
 

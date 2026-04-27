@@ -10,7 +10,7 @@ from schemas.constants import Topics
 from schemas.models import BleData
 from schemas.padlock_enums import BleDevice
 if TYPE_CHECKING:
-    pass
+    from paho.mqtt import client as mqtt_client
 
 
 class BLEDevice():
@@ -24,7 +24,7 @@ class BLEDevice():
     def __repr__(self):
         return f"<BLEDevice(localname='{self.local_name}', UUID='{self.UUID}', token='{self.token}')>"
     
-    def BLE(self, app_id: str) -> None:
+    def BLE(self, client: mqtt_client, app_id: str) -> None:
         # 'register' == No BLE data, will register and return BLE data in subprocess.
         # 'detect' == BLE data already exists, will skip registration and go to listening & detect state. 
         cmd_arg = "register"
@@ -56,11 +56,11 @@ class BLEDevice():
             }) + "\n")
             self.ble_proc.stdin.flush()
         
-        threading.Thread(target=self._stdout_reader, args=(app_id,), daemon=True).start()
+        threading.Thread(target=self._stdout_reader, args=(client, app_id,), daemon=True).start()
         threading.Thread(target=self._stderr_reader, daemon=True).start()
 
     # stdout read from subprocess to get BLE presense 
-    def _stdout_reader(self, app_id: str) -> None: 
+    def _stdout_reader(self, client: mqtt_client, app_id: str) -> None: 
         assert self.ble_proc.stdout is not None
         for line in self.ble_proc.stdout:
             line = line.strip()
@@ -78,7 +78,7 @@ class BLEDevice():
                     self.local_name = event.get(BleDevice.localname)
                     self.token = event.get(BleDevice.token)
                     self.UUID = event.get(BleDevice.deviceUUID)
-                    self._store_ble_data(app_id)
+                    self._store_ble_data(client, app_id)
 
     def _stderr_reader(self) -> None:
         assert self.ble_proc.stderr is not None
@@ -87,9 +87,9 @@ class BLEDevice():
             if line:
                 print("BLE stderr:", line)
     
-    def _store_ble_data(self, app_id: str) -> None:
+    def _store_ble_data(self, client: mqtt_client, app_id: str) -> None:
         try:
-            self.ble_proc.client.publish(
+            client.publish(
                 Topics.ble,
                 BleData(
                     id=app_id,

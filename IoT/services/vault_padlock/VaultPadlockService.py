@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import threading
 from lock.lock_mechanism import detect_lock_mechanism, lock
 from data.padlock_data_gen import PadlockDataGenerator
-from IoT.services.vault_padlock.CLIService import CLIService
+from services.vault_padlock.CLIService import CLIService
 from services.vault_padlock.BLEDevice import BLEDevice
 from services.vault_padlock.BLEData import BLEData
 
@@ -22,8 +22,8 @@ class VaultPadlockService():
         self.ble_data = BLEData(self.ble_device)
     
 
-    def start_ble(self) -> None:
-        self.ble_device.BLE(self.app_id)
+    def start_ble(self, client: mqtt_client) -> None:
+        self.ble_device.BLE(client, self.app_id)
 
 
     def lock_mechanism(self, msg, host_topic: str, status_data: StatusData) -> None:
