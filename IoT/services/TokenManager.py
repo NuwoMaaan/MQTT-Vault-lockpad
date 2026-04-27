@@ -53,7 +53,7 @@ class TokenManager:
        
 
     def _ensure_valid_token(self) -> None:
-        if self.jwt and not self._is_token_expired(self.token_expires_at):
+        if self.jwt and not self._is_token_expired():
             return
         
         try:
@@ -66,6 +66,12 @@ class TokenManager:
             raise
     
 
+    def _is_token_expired(self) -> bool:
+        if not self.token_expires_at:
+            return True
+        return time.time() > (self.token_expires_at - 300)  #300
+
+
     def _request_token(self, url: str, headers: dict) -> tuple[str, str, float]:
         response = requests.post(url, headers=headers, timeout=10)
         response.raise_for_status()
@@ -76,12 +82,6 @@ class TokenManager:
         token_expires_at = time.time() + data["access_token"]["expires_in"]
 
         return jwt_token, refresh_jwt_token, token_expires_at
-
-
-    def _is_token_expired(self, token_expires_at: float | None) -> bool:
-        if not token_expires_at:
-            return True
-        return time.time() > (token_expires_at - 300)  #300
 
 
     def _create_jwt_token(self, api_key: str) -> tuple[str, str, float]:

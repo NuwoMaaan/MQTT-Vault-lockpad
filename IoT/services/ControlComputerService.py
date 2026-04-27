@@ -17,7 +17,7 @@ class ControlComputerService:
         self.api_client = BleApiClient()
         self.ble_handler = BleHandler(self.token_manager, self.api_client)
     
-    def start_token_refresh_loop(self) -> None:
+    def start_jwt_refresh_loop(self) -> None:
         self.token_manager.start_token_refresh_loop()
     
     def ble_data_handler(self, msg, client):
