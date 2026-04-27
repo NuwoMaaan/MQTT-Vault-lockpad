@@ -18,7 +18,7 @@ class MQTTApp(ABC):
     def subscribe(self):
         pass
 
-    def run(self, ble_proc):
+    def run(self, ble_proc = None):
         ascii_art()
         print(f"Device_id: {self.id}")
         threading.Thread(target=self.publish, args=(self.client,)).start()
@@ -32,4 +32,5 @@ class MQTTApp(ABC):
             shutdown_flag.set()
             self.client.loop_stop()
             self.client.disconnect()
-            ble_proc.terminate()
+            if ble_proc:
+                ble_proc.terminate()

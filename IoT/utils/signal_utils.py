@@ -1,5 +1,4 @@
 import signal
-import sys
 import threading
 
 shutdown_flag = threading.Event()
