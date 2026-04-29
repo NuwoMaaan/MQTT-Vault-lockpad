@@ -11,38 +11,62 @@ Defined topics in this project follow the structure as: `vault/padlock/{endpoint
 **NOTE: This project has no pratical use as an effective vault lockpad system and does not interface with hardware.**
 
 ---
-
-### System Components
-
-#### 1. **MQTT & EMQX** 
-The project has simulation of IoT device sending data using MQTT protocol using EMQX as the broker. EMQX dashboard can be accessed and has been pre-configured to establish client connections and connect the the MongoDB.
-#### 2. **MongoDB** 
-long-term storage and ease of use for development because it is non-relational database. MongoDB has a connector type avaliable for EMQX dashboard.
-#### 3. **FastAPI** 
-Python backend framework to enable integration of Grafana (Infinity) to retrieve logs from MongoDB (MongoDB datasource is limited to Grafana Enterprise version). Using JWT to protect API and only allow Grafana access to routes.
-#### 4. **Grafana**
-Dashboard & data visualization tool use to showcase business/domain data) which EMQX dashboard does not collect (e.g. cpu_temp)
-#### 5. **BLE**
-Bluetooth low-energy, used to register a device and provide it a token is used to verify the device is near to allow an access attempt.
-#### 6. **Docker**
-To enable easy & consistent deployments across various platforms.
-
----
-
-### **Indefinite Lockout Mechanism:**
-
-- When the Control Computer detects > 3 login attempts, it publishes a lockout message to the vault padlock.
-- The padlock sets its state to `"INDEFINITE_LOCKED"` with error message: `"ACCESS FAILURE: TOO MANY UNLOCK ATTEMPTS DETECTED"`
-- Access attempts are made interactively on the vault padlock program.
-
----
-
 ### **System Architecture** 
 
 <img src="architecture.png" alt="screenshot" width="700">
 
 ---
+### System Components
 
+#### 1. **MQTT & EMQX** 
+- IoT devices connect and communicate using MQTT protocol via the EMQX broker   
+- EMQX broker has been pre-configured to establish client connections, MongoDB connector and, rules & actions      
+- All published metrics, status, and event data are automatically captured by EMQX broker rules and forwarded to MongoDB for persistent storage and data retrieval.    
+- Configuration of the broker is dependent on a service init container - emqx-init
+
+#### 2. **IoT Applications** 
+##### **Vault Padlock**
+- The Vault Padlock is an MQTT-connected IoT device that manages secure access to physical vaults using a 2FA authentication system combining BLE (Bluetooth Low Energy) device verification and CLI-based passcode authentication  
+- A token is inserted into the peripheral device, access requires both the valid BLE device to be in proximity AND the correct passcode      
+- Publishes system metrics and lock status every non-abitrary amount of time but on occurence publishes events & BLE data requests  
+- Uses a Golang BLE subprocess that handles Bluetooth operations including device discovery, registration, and presence detection  
+- interprocess communication is achieved by stdin & stdout to relay BLE data to each process 
+- BLE device data is stored in MongoDB, a retrieval process executes to get existing BLE device data and relayed to Golang subprocess
+##### **Control Computer**
+- The Control Computer serves as the central monitoring and management hub for the Vault Padlock ecosystem. It monitors real-time device data, enforces security policies, manages authentication with the backend API, and coordinates BLE device data retrieval between the backend and vault padlock.
+- Provides authenticated API access to fetch and store BLE credentials securely via the backend and bridges data to and from vault padlock
+- Maintains continuous authenticated communication with the backend API using JWT, an automatic token refresh service loop proactively refreshes tokens 5 minutes before expiry
+##### **Monitoring App**
+- An interactive CLI utility for real-time MQTT topic monitoring and message publishing
+- Capable of subscribing to multiple system topics simultaneously, publish test messages, and listen for incoming messages from vault padlock and the control computer
+
+#### 3. **MongoDB** 
+- long-term storage and ease of use for development because it is a non-relational database. MongoDB has a connector type avaliable for EMQX dashboard, enabling database insertion directly from EMQX broker
+- Stores status, metric, event and BLE device data
+  
+#### 4. **FastAPI Backend** 
+- Python backend framework to enable integration of Grafana (Infinity) to retrieve logs from MongoDB (MongoDB datasource is limited to Grafana Enterprise version), enable integration with IoT control computer application providing BLE device data retrieval bridge path
+- Route endpoints are protected with JWT authentication, tokens contain specific permissions only allowing access to particular routes
+- Configures Grafana Infinity datasource with a background service that inserts & maintains valid JWT for Grafana enabling secure access as a long-lived token service
+
+#### 5. **Grafana**
+- Dashboard & data visualization tool use to showcase business/domain data which EMQX dashboard does not collect (e.g. cpu_temp, access_attempts)
+- YAML configuration files are loaded into application container with docker volumes for provisioning of dashboard & settings
+- Grafana Infinity datasource is used to enable data retrieval through API access and complete securely using bearer token authentication method
+  
+#### 6. **BLE**
+- BLE (Bluetooth Low Energy) is used to register a device and provide it a token, enabling a 2FA (two-factor authentication) mechanism through proximity-based verification
+- Follows the Generic Attribute Profile (GATT) model, where devices expose structured data via Services and Characteristics identified by UUIDs
+- A virtual or physical BLE peripheral device (e.g. padlockAuth) advertises its presence, while the Vault Padlock acts as a central device that scans, connects, and interacts with it
+- Registered BLE device metadata (name, UUIDs, tokens) is persisted in MongoDB and retrieved at runtime to validate proximity-based authentication attempts
+- Authentication data (token) is exchanged via a predefined Characteristic, with permissions read, write, and write without response controlling access
+- Presence detection is achieved through periodic scanning; successful identification of a registered device satisfies the second authentication factor
+
+#### 7. **Docker**
+- Docker enables easy & consistent/idempotent deployments across different platforms and allows fast development testing
+- Docker container services in project: emqx, emqx-init, backend, mongo, grafana
+- Docker-compose is used to orchestrate fast and easy deployment
+---
 ### Data Flow (MQTT)
 
 ```
@@ -58,6 +82,12 @@ VaultPadlock                               ControlComputer
    |                                             |
    +-------- enters INDEFINITE_LOCKED state
 ```
+---
+### **Indefinite Lockout Mechanism:**
+
+- When the Control Computer detects > 3 login attempts, it publishes a lockout message to the vault padlock.
+- The padlock sets its state to `"INDEFINITE_LOCKED"` with error message: `"ACCESS FAILURE: TOO MANY UNLOCK ATTEMPTS DETECTED"`
+- Access attempts are made interactively on the vault padlock program.
 ---
 
 ### Deployment Steps
@@ -116,7 +146,7 @@ MQTT Lockpad/
 │   ├── services/      # MonitorApp, ControlComputer & VaultPadlock service classes
 │   └── utils/         # Helper modules (console output, lockout detection, signal handling)
 │
-├── emqx/          # Provisioning configurations & init automation
+├── emqx/              # Provisioning configurations & init automation
 │   └── provisioning/
 |
 ├── backend/           # FastAPI backend
