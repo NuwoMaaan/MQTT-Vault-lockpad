@@ -23,6 +23,10 @@ services:
       - emqx_log:/opt/emqx/log
       - ./emqx/provisioning/declarative/base.hocon:/opt/emqx/etc/base.hocon
       - ./emqx/provisioning/declarative/user.json:/opt/emqx/etc/user.json
+      - ./emqx/provisioning/declarative/authn.conf:/opt/emqx/etc/authn.conf
+      - ./emqx/provisioning/declarative/connectors.conf:/opt/emqx/etc/connectors.conf
+      - ./emqx/provisioning/declarative/rules.conf:/opt/emqx/etc/rules.conf
+      - ./emqx/provisioning/declarative/actions.conf:/opt/emqx/etc/actions.conf
     networks:
       - database-network
       - emqx-network
