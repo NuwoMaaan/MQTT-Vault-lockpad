@@ -21,18 +21,22 @@ services:
     volumes:
       - emqx_data:/opt/emqx/data
       - emqx_log:/opt/emqx/log
+      - ./emqx/provisioning/declarative/base.hocon:/opt/emqx/etc/base.hocon
+      - ./emqx/provisioning/declarative/user.json:/opt/emqx/etc/user.json
     networks:
       - database-network
       - emqx-network
-
-  emqx-init:
-    build:
-      context: ./emqx 
-    depends_on:
-      emqx:
-        condition: service_healthy
-    networks:
-      - emqx-network
+      
+### Deprecated: Using base.hocon and volume mounts for configuration instead of API provisioning.
+### Keeping this service definition for reference.
+  # emqx-init:
+  #   build:
+  #     context: ./emqx 
+  #   depends_on:
+  #     emqx:
+  #       condition: service_healthy
+  #   networks:
+  #     - emqx-network
   
   mongo:
     image: mongo:7

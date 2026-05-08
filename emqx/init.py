@@ -4,6 +4,11 @@ import time
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+# ===================================================================================================================
+### Deprecated: Using base.hocon and volume mounts for configuration instead of API provisioning.
+### Keeping this file for reference and potential future use, but it's no longer part of the provisioning process.
+### Was used in 'init.py' to programmatically configure EMQX via API calls.
+# ===================================================================================================================
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
@@ -111,21 +116,21 @@ if __name__ == "__main__":
         login()
 
         provisioning_steps_1 = [
-            ("authentication", "provisioning/auth.json"),
-            ("authentication/password_based:built_in_database/users", "provisioning/device-user.json"),
+            ("authentication", "provisioning/api/auth.json"),
+            ("authentication/password_based:built_in_database/users", "provisioning/api/device-user.json"),
             
-            ("connectors", "provisioning/mongo-connector.json"),
+            ("connectors", "provisioning/api/mongo-connector.json"),
 
-            ("actions", "provisioning/action-metrics.json"),
-            ("actions", "provisioning/action-event.json"),
-            ("actions", "provisioning/action-status.json"),
+            ("actions", "provisioning/api/action-metrics.json"),
+            ("actions", "provisioning/api/action-event.json"),
+            ("actions", "provisioning/api/action-status.json"),
         ]
         
         # 'rules' don't follow existing post pattern, so handle separately to check for existing rules and avoid duplicates
         provisioning_steps_2 = [
-            ("rules", "provisioning/rule-metrics.json"),
-            ("rules", "provisioning/rule-event.json"),
-            ("rules", "provisioning/rule-status.json"),
+            ("rules", "provisioning/api/rule-metrics.json"),
+            ("rules", "provisioning/api/rule-event.json"),
+            ("rules", "provisioning/api/rule-status.json"),
         ]
 
         for endpoint, file_path in provisioning_steps_1:
