@@ -116,21 +116,21 @@ if __name__ == "__main__":
         login()
 
         provisioning_steps_1 = [
-            ("authentication", "provisioning/api/auth.json"),
-            ("authentication/password_based:built_in_database/users", "provisioning/api/device-user.json"),
+            ("authentication", "config/auth.json"),
+            ("authentication/password_based:built_in_database/users", "config/device-user.json"),
             
-            ("connectors", "provisioning/api/mongo-connector.json"),
+            ("connectors", "config/mongo-connector.json"),
 
-            ("actions", "provisioning/api/action-metrics.json"),
-            ("actions", "provisioning/api/action-event.json"),
-            ("actions", "provisioning/api/action-status.json"),
+            ("actions", "config/action-metrics.json"),
+            ("actions", "config/action-event.json"),
+            ("actions", "config/action-status.json"),
         ]
         
         # 'rules' don't follow existing post pattern, so handle separately to check for existing rules and avoid duplicates
         provisioning_steps_2 = [
-            ("rules", "provisioning/api/rule-metrics.json"),
-            ("rules", "provisioning/api/rule-event.json"),
-            ("rules", "provisioning/api/rule-status.json"),
+            ("rules", "config/rule-metrics.json"),
+            ("rules", "config/rule-event.json"),
+            ("rules", "config/rule-status.json"),
         ]
 
         for endpoint, file_path in provisioning_steps_1:

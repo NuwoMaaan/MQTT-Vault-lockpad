@@ -35,7 +35,7 @@ services:
 ### Keeping this service definition for reference.
   # emqx-init:
   #   build:
-  #     context: ./emqx 
+  #     context: ./emqx/provisioning/imperative 
   #   depends_on:
   #     emqx:
   #       condition: service_healthy
