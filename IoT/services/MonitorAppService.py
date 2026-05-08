@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import threading
 from schemas.constants import Topics, U_INPUT, MODE
 if TYPE_CHECKING:
     from app.MonitorApp import MonitorApp

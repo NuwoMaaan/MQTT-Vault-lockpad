@@ -4,8 +4,8 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir requests python-dotenv
 
-COPY . /app/emqx
+COPY . /app
 
 WORKDIR /app
 
-CMD ["python", "-m", "emqx.init"]
+CMD ["python", "init.py"]
