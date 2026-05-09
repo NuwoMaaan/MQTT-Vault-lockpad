@@ -94,7 +94,6 @@ class TokenManager:
 
 
     def _refresh_token(self, refresh_token: str) -> tuple[str, str, float]:
-        print("Refreshing token...")
         return self._request_token(
             url="http://localhost:8000/api/auth/token/refresh",
             headers={"X-Refresh-Token": refresh_token}
