@@ -8,15 +8,16 @@ from auth.grafana.init import init as init_grafana
 
 ORIGIN = ["http://localhost:3000"]
 
+token_manager = GrafanaTokenRefreshService()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_grafana()
-    GrafanaTokenRefreshService.start_token_refresh_loop()
+    init_grafana(token_manager)
+    token_manager.start_token_refresh_loop()
     try:
         yield
     finally:
-        GrafanaTokenRefreshService.stop_token_refresh_loop()
+        token_manager.stop_token_refresh_loop()
 
 
 
