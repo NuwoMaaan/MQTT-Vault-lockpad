@@ -98,7 +98,7 @@ def configure_datasource(token):
     r.raise_for_status()
     print("Grafana Datasource: Infinity bearer token updated")
 
-def init():
+def init(token_manager: GrafanaTokenRefreshService):
     try:
         service_account_id, service_account_exists = create_service_account("admin_service_account")
         if service_account_exists:
@@ -120,17 +120,11 @@ def init():
         configure_datasource(token_response.access_token)
         print("Complete - Grafana Infininty datasource authorization method configuration")
 
-        GrafanaTokenRefreshService.jwt = token_response.access_token
-        GrafanaTokenRefreshService.refresh_jwt = token_response.refresh_token
-        GrafanaTokenRefreshService.token_expires_at = time.time() + token_response.access_token_expires_in
-        GrafanaTokenRefreshService.grafana_token = grafana_token
+        token_manager.token = token_response.access_token
+        token_manager.refresh_token = token_response.refresh_token
+        token_manager.token_expires_at = time.time() + token_response.access_token_expires_in
+        token_manager.grafana_token = grafana_token
 
     finally:
         session.close()
-
-if __name__ == "__main__":
-    init()
-
-    
-
 
