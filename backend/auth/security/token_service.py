@@ -11,10 +11,8 @@ def issue_service_token(service_name: str, scopes: list[str]) -> TokenResponse:
     access_token = create_access_token(data)
     refresh_token = create_refresh_token(data)
     
-    access_expires_in = settings.EXPIRE * 24 * 60 * 60
-    refresh_expires_in = settings.REFRESH_EXPIRE * 24 * 60 * 60
-    # access_expires_in = 60
-    # refresh_expires_in = 300
+    access_expires_in = settings.EXPIRE * 60 
+    refresh_expires_in = settings.REFRESH_EXPIRE * 60
     
     return TokenResponse(
         access_token=access_token,
