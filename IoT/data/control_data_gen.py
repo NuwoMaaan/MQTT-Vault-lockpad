@@ -1,5 +1,4 @@
 from schemas.models import ControlComputerLock
-from pydantic import ValidationError
 from schemas.padlock_enums import LockState
 from datetime import datetime, timezone
 
@@ -21,8 +20,8 @@ class LockData():
                 reason="Consecutive failed access attempts",
                 timestamp=timestamp
             )
-        except ValidationError as e:
-            print("Validation error:", e)
+        except Exception as e:
+            print("Error:", e)
             return None
         
         return data

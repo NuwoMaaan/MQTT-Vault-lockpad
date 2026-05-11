@@ -23,7 +23,7 @@ class BleApiClient:
         response = requests.post(
             self.url,
             headers={"Authorization": f"Bearer {jwt}"},
-            json=payload.model_dump(mode="json"),
+            json=payload.to_dict(),
             timeout=10,
         )
         response.raise_for_status()

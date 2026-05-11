@@ -2,7 +2,6 @@ import random
 import psutil
 from datetime import datetime, timezone
 from schemas.models import VaultPadlockMetrics, VaultPadlockStatus, VaultPadlockEvents
-from pydantic import ValidationError
 
 
 class PadlockDataGenerator():
@@ -12,15 +11,15 @@ class PadlockDataGenerator():
         self.event_data = EventData(id)
 
     def generate_status_data(self) -> str | None:
-        return _generate_padlock_status_data(self.status_data).model_dump_json()
+        return _generate_padlock_status_data(self.status_data).to_json()
 
     def generate_metric_data(self) -> str | None:
-        return _generate_padlock_metric_data(self.metric_data).model_dump_json()
+        return _generate_padlock_metric_data(self.metric_data).to_json()
 
     def generate_event_data(self, event: str, result: str) -> str | None:
         self.event_data.event = event
         self.event_data.result = result
-        return _generate_padlock_event_data(self.event_data).model_dump_json()
+        return _generate_padlock_event_data(self.event_data).to_json()
 
 class StatusData():
     def __init__(self, id: str):
@@ -42,8 +41,8 @@ def _generate_padlock_status_data(data: StatusData) -> VaultPadlockStatus | None
             error=data.error,
             timestamp=timestamp,
             )
-    except ValidationError as e:
-        print("Validation error:", e)
+    except Exception as e:
+        print("Error:", e)
         return None
     
     return status_data
@@ -68,8 +67,8 @@ def _generate_padlock_metric_data(data: MetricData) -> VaultPadlockMetrics | Non
             temperature=data.temperature,
             timestamp=timestamp,
             )
-    except ValidationError as e:
-        print("Validation error:", e)
+    except Exception as e:
+        print("Error:", e)
         return None
     
     return metric_data
@@ -90,8 +89,8 @@ def _generate_padlock_event_data(data: EventData) -> VaultPadlockEvents | None:
             result=data.result,
             timestamp=timestamp
         )
-    except ValidationError as e:
-        print("Validation Error:", e)
+    except Exception as e:
+        print("Error:", e)
         return None
     
     return event_data
