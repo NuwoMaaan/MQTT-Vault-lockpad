@@ -8,7 +8,7 @@ MQTT communications, is demonstrated through arbitrary data generation from `(Va
 
 Defined topics in this project follow the structure as: `vault/padlock/{endpoint}`
 
-**NOTE: This project has no pratical use as an effective vault lockpad system and does not interface with hardware.**
+**NOTE: This project has no practical use as an effective vault lockpad system**
 
 ---
 ### **System Architecture** 
