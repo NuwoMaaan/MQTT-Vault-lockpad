@@ -27,7 +27,7 @@ class BleHandler:
         except json.JSONDecodeError as e:
             print(f"Invalid JSON: {e}")
             return
-
+        
         # Try BleData
         try:
             payload = BleData.from_dict(data)
