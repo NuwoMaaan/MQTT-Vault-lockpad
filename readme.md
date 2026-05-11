@@ -141,7 +141,7 @@ MQTT Lockpad/
 │   ├── connection/        # MQTT broker connection configuration
 │   ├── data/              # Data generators for padlock and control messages
 │   ├── lock/              # Indefinite lock detection & enforcement logic
-│   ├── schemas/           # Pydantic models for data validation
+│   ├── schemas/           # Dataclass models, constants, StrEnums
 │   ├── services/          # MonitorApp, ControlComputer & VaultPadlock service classes
 │   └── utils/             # Helper modules (console output, lockout detection, signal handling)
 │
