@@ -97,7 +97,7 @@ class BLEDevice():
                     UUID=self.UUID,
                     localname=self.local_name,
                     timestamp=datetime.now(timezone.utc)
-                ).model_dump_json()
+                ).to_json()
             )
         except Exception as e:
             print(f"Failed to publish token store data: {e}")

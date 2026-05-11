@@ -8,15 +8,18 @@ from schemas.padlock_enums import LockState, PadlockEvent, EventResult
 T = TypeVar("T", bound="SerializableMixin")
 
 class SerializableMixin:
-    def to_json(self):
-        return json.dumps(asdict(self), default=str)
+    def to_dict(self) -> dict:
+        return asdict(self)
+    
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), default=str)
     
     @classmethod
     def from_dict(cls: Type[T], data: dict) -> T:
         return cls(**data)
     
-#model_validate() = from_dict
-#mode_dump_json() = to_json
+#model_validate() => from_dict
+#model_dump_json() => to_json
     
 @dataclass(slots=True)
 class VaultPadlockMetrics(SerializableMixin):
@@ -62,4 +65,5 @@ class BleData(SerializableMixin):
     token: str
     localname: str
     timestamp: datetime
+
 

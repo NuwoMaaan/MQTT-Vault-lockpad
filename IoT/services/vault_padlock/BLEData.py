@@ -25,8 +25,9 @@ class BLEData:
             nonlocal token, uuid, localname
             try:
                 data = json.loads(msg.payload.decode())
-                payload = BleData.model_validate(data)
-            except (json.JSONDecodeError, ValueError):
+                payload = BleData.from_dict(data)
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"Error validating BleData: {e}")
                 return
 
             if msg.topic != host_topic:
@@ -49,7 +50,7 @@ class BLEData:
                     id=app_id,
                     request="ble_request",
                     timestamp=datetime.now(timezone.utc)
-                ).model_dump_json()
+                ).to_json()
             )
 
             end_time = time.time() + timeout

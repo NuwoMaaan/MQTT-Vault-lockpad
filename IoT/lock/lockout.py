@@ -8,7 +8,7 @@ from utils.console import console_lock_out
 fail_count = 0
 
 def publish_lockout(client, generator: LockData, vault_id: str) -> None:
-    lockout = generator.generate_lock_data().model_dump_json()
+    lockout = generator.generate_lock_data().to_json()
     if lockout:
         topic = f"vault/padlock/{vault_id}"
         client.publish(topic, lockout)
@@ -20,7 +20,7 @@ def detection_login_attempts(msg) -> str | None:
         if (msg.topic) != Topics.event:
             return None                             
         data = json.loads(msg.payload.decode()) 
-        payload = VaultPadlockEvents.model_validate(data)
+        payload = VaultPadlockEvents.from_dict(data)
         if payload.event == PadlockEvent.access_attempt and payload.result == EventResult.fail:
             if fail_count > 3:
                 return payload.id

@@ -1,4 +1,3 @@
-
 from schemas.padlock_enums import LockState
 from schemas.models import ControlComputerLock
 from data.padlock_data_gen import PadlockDataGenerator
@@ -16,7 +15,7 @@ def detect_lock_mechanism(msg, host_topic: str) -> bool:
             return False
                                                                
         data = json.loads(msg.payload.decode())    
-        payload = ControlComputerLock.model_validate(data)
+        payload = ControlComputerLock.from_dict(data)
         if payload.lock_state == LockState.indefinite:
             return True
         return False
