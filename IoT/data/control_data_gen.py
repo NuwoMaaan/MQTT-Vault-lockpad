@@ -13,7 +13,7 @@ class LockData():
 
     def generate_lock_data(self) -> ControlComputerLock: 
         try:
-            timestamp = datetime.now(timezone.utc)
+            timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
             data = ControlComputerLock(
                 id=self.id,
                 lock_state=LockState.indefinite,
