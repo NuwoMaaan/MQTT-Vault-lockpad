@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 import json
-from pydantic import ValidationError
 from schemas.models import BleData, BleDataRequest
 from schemas.constants import Topics
 

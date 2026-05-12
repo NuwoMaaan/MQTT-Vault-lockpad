@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from typing import TYPE_CHECKING
 from schemas.constants import Topics
 import sys
@@ -18,6 +19,9 @@ class CLIService():
     def __init__(self, ble_device: BLEDevice, data: PadlockDataGenerator):
         self.ble_device = ble_device
         self.data = data
+    
+    def cli_access(self, client: mqtt_client, passcode: str) -> None:
+        threading.Thread(target=self._cli_access_loop, args=(client, passcode), daemon=True).start()
 
     def _cli_access_loop(self, client: mqtt_client, passcode: str) -> None:
         last_state = None

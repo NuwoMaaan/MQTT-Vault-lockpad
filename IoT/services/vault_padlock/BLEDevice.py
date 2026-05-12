@@ -27,14 +27,29 @@ class BLEDevice():
     def BLE(self, client: mqtt_client, app_id: str) -> None:
         # 'register' == No BLE data, will register and return BLE data in subprocess.
         # 'detect' == BLE data already exists, will skip registration and go to listening & detect state. 
+        cmd_arg = self._resolve_arg()
+
+        # Start BLE subprocess for BLE bluetooth operation 
+        self._ble_subprocess(cmd_arg)
+        
+        # stdin write to subprocess BLE data
+        self._write_ble_data(cmd_arg)
+        
+        threading.Thread(target=self._stdout_reader, args=(client, app_id,), daemon=True).start()
+        threading.Thread(target=self._stderr_reader, daemon=True).start()
+    
+
+    def _resolve_arg(self) -> str:
         cmd_arg = "register"
         if (self.local_name is not None
             and self.UUID is not None
             and self.token is not None
         ):
             cmd_arg = "detect"
+        return cmd_arg
+    
 
-        # Start BLE subprocess for BLE bluetooth operation 
+    def _ble_subprocess(self, cmd_arg: str) -> None:
         ble_cmd_dir = Path(__file__).resolve().parents[3] / "BLE" 
         self.ble_present = False
         self.ble_proc = subprocess.Popen(
@@ -46,8 +61,9 @@ class BLEDevice():
             text=True,
             bufsize=1,
         )
-        
-        # stdin write to subprocess BLE data
+
+
+    def _write_ble_data(self, cmd_arg: str) -> None:
         if cmd_arg == "detect":
             self.ble_proc.stdin.write(json.dumps({
                 "DeviceUUID": self.UUID,
@@ -55,9 +71,7 @@ class BLEDevice():
                 "Token": self.token
             }) + "\n")
             self.ble_proc.stdin.flush()
-        
-        threading.Thread(target=self._stdout_reader, args=(client, app_id,), daemon=True).start()
-        threading.Thread(target=self._stderr_reader, daemon=True).start()
+    
 
     # stdout read from subprocess to get BLE presense 
     def _stdout_reader(self, client: mqtt_client, app_id: str) -> None: 
@@ -80,6 +94,7 @@ class BLEDevice():
                     self.UUID = event.get(BleDevice.deviceUUID)
                     self._store_ble_data(client, app_id)
 
+
     def _stderr_reader(self) -> None:
         assert self.ble_proc.stderr is not None
         for line in self.ble_proc.stderr:
@@ -87,6 +102,7 @@ class BLEDevice():
             if line:
                 print("BLE stderr:", line)
     
+
     def _store_ble_data(self, client: mqtt_client, app_id: str) -> None:
         try:
             client.publish(
@@ -101,4 +117,3 @@ class BLEDevice():
             )
         except Exception as e:
             print(f"Failed to publish token store data: {e}")
-            

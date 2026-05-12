@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-import threading
 from lock.lock_mechanism import detect_lock_mechanism, lock
 from data.padlock_data_gen import PadlockDataGenerator
 from services.vault_padlock.CLIService import CLIService
@@ -32,7 +31,7 @@ class VaultPadlockService():
         
 
     def cli_access(self, client: mqtt_client, passcode: str) -> None:
-        threading.Thread(target=self.cli_service._cli_access_loop, args=(client, passcode), daemon=True).start()
+        self.cli_service.cli_access(client, passcode)
     
 
     def retrieve_ble_data(self, client: mqtt_client, host_topic: str, timeout: float = 5.0) -> None:
