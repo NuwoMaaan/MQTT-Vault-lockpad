@@ -37,7 +37,7 @@ class BleHandler:
             except Exception as api_error:
                 print(f"Error posting BleData: {api_error}")
                 return
-        except (TypeError, ValueError) as parse_error:
+        except (TypeError, ValueError):
             pass
         
         # Try BleDataRequest
@@ -48,7 +48,7 @@ class BleHandler:
                 self._transport_ble(ble_data, client, payload.id)
             else:
                 print("no ble data found for request")
-        except (TypeError, ValueError) as parse_error:
+        except (TypeError, ValueError):
             pass
 
     def _transport_ble(self, ble_data: BleData, client, vault_id: str) -> None:
