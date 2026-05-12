@@ -73,7 +73,7 @@ class GrafanaTokenRefreshService:
 
     def _refresh_token(self) -> tuple[str, str, float]:
         response = requests.post(
-            "http://localhost:8000/api/auth/token/refresh",
+            url="http://localhost:8000/api/auth/token/refresh",
             headers={"X-Refresh-Token": self.refresh_token},
             timeout=10,
         )
