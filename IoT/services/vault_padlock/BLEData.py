@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from paho.mqtt import client as mqtt_client
     from services.vault_padlock.BLEDevice import BLEDevice
 
-class BLEData:
+class BLEData():
     def __init__(self, ble_device: BLEDevice):
         self.ble_device = ble_device
         self.token: str = None
