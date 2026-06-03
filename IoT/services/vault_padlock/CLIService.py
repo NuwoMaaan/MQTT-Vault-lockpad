@@ -19,52 +19,93 @@ class CLIService():
     def __init__(self, ble_device: BLEDevice, data: PadlockDataGenerator):
         self.ble_device = ble_device
         self.data = data
+        self._last_ble_state = None
     
+
     def cli_access(self, client: mqtt_client, passcode: str) -> None:
         threading.Thread(target=self._cli_access_loop, args=(client, passcode), daemon=True).start()
 
+
     def _cli_access_loop(self, client: mqtt_client, passcode: str) -> None:
-        last_state = None
-
         while not shutdown_flag.is_set():
-            if self.ble_device.ble_present != last_state:
-                status = "BLE present - enter passcode" if self.ble_device.ble_present else "BLE absent - waiting"
-                sys.stdout.write(f"\r{status}                    \n")
-                sys.stdout.flush()
-                last_state = self.ble_device.ble_present
+            self._handle_ble_presence()
 
-            if not self.ble_device.ble_present:
-                time.sleep(0.2)
+            if not self._wait_for_ble():
                 continue
-            
-            if self.data.status_data.state == LockState.unlocked:
-                print("Vault unlocked, press Enter to lock.")
-                input()
-                self.data.status_data.state = LockState.locked
+
+            if self._handle_unlocked_state():
                 continue
 
             code = input("Enter passcode: ").strip()
+
             if self.data.status_data.state == LockState.indefinite:
                 break
-        
-            if not self.ble_device.ble_present:
-                print("Access denied: BLE no longer present")
-                self.data.metric_data.unlock_attempts += 1
-                self._access_attempt_data(client, event=PadlockEvent.access_attempt, result=EventResult.fail)
-                continue
 
-            if code != passcode:
-                print("Access denied: incorrect passcode")
-                self.data.metric_data.unlock_attempts += 1
-                self._access_attempt_data(client, event=PadlockEvent.access_attempt, result=EventResult.fail)
-                continue
+            self._handle_access_attempt(client, passcode, code)
 
-            if code == passcode and self.ble_device.ble_present:
-                print("Access granted")
-                self.data.status_data.last_unlock = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-                self.data.status_data.state = LockState.unlocked
-                self._access_attempt_data(client, event=PadlockEvent.access_attempt, result=EventResult.success)
-                continue
+
+    def _handle_ble_presence(self) -> None:
+        if self.ble_device.ble_present != self._last_ble_state:
+            status = (
+                "BLE present - enter passcode"
+                if self.ble_device.ble_present
+                else "BLE absent - waiting"
+            )
+
+            sys.stdout.write(f"\r{status}                    \n")
+            sys.stdout.flush()
+
+            self._last_ble_state = self.ble_device.ble_present
+
+
+    def _wait_for_ble(self) -> bool:
+        if self.ble_device.ble_present:
+            return True
+        time.sleep(0.2)
+        return False
+    
+
+    def _handle_unlocked_state(self) -> bool:
+        if self.data.status_data.state != LockState.unlocked:
+            return False
+        print("Vault unlocked, press Enter to lock.")
+        input()
+
+        self.data.status_data.state = LockState.locked
+        return True
+    
+
+    def _handle_access_attempt(self, client: mqtt_client, expected_passcode: str, entered_code: str) -> None:
+        if not self.ble_device.ble_present:
+            self._access_denied(client, "BLE no longer present")
+            return
+
+        if entered_code != expected_passcode:
+            self._access_denied(client, "incorrect passcode")
+            return
+
+        self._access_granted(client)
+
+
+    def _access_denied(self, client: mqtt_client, reason: str) -> None:
+        print(f"Access denied: {reason}")
+        self.data.metric_data.unlock_attempts += 1
+        self._access_attempt_data(
+            client,
+            event=PadlockEvent.access_attempt,
+            result=EventResult.fail
+        )
+
+
+    def _access_granted(self, client: mqtt_client) -> None:
+        print("Access granted")
+        self.data.status_data.last_unlock = (datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"))
+        self.data.status_data.state = LockState.unlocked
+        self._access_attempt_data(
+            client,
+            event=PadlockEvent.access_attempt,
+            result=EventResult.success
+        )
 
 
     def _access_attempt_data(self, client: mqtt_client, event: str, result: str):
